@@ -1,20 +1,28 @@
 "use client"
 
 import type React from "react"
-
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, Save, RefreshCw, ArrowRight, X, Plus, ZoomIn, ZoomOut, Move, Download } from "lucide-react"
+import { Loader2, Save, RefreshCw, ArrowRight, X, Plus, Download } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { Switch } from "@/components/ui/switch"
 import { Separator } from "@/components/ui/separator"
+import ReactFlow, {
+  MiniMap,
+  Controls,
+  Background,
+  Node as RFNode,
+  Edge as RFEdge,
+  Position,
+} from "reactflow"
+import "reactflow/dist/style.css"
 
 // Definição de tipos
 type FluxoData = {
@@ -60,11 +68,8 @@ export default function FlowEditor() {
   const [nodes, setNodes] = useState<FlowNode[]>([])
   const [edges, setEdges] = useState<FlowEdge[]>([])
   const [showAllNodes, setShowAllNodes] = useState(false)
-  const [zoom, setZoom] = useState(1)
-  const [pan, setPan] = useState({ x: 0, y: 0 })
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 })
-  const canvasRef = useRef<HTMLDivElement>(null)
+  const [rfNodes, setRfNodes] = useState<RFNode[]>([])
+  const [rfEdges, setRfEdges] = useState<RFEdge[]>([])
 
   // Carregar dados do fluxo
   const fetchFluxoData = useCallback(async () => {
@@ -72,7 +77,6 @@ export default function FlowEditor() {
     setError(null)
     try {
       // Simulando a resposta da API para fins de demonstração
-      // Em produção, substituir por: const response = await fetch('http://localhost:3000/api/fluxo')
       const mockResponse = {
         menu_principal: {
           "1": "matriculas_menu",
@@ -302,15 +306,53 @@ export default function FlowEditor() {
 
       // Começar pelo menu principal
       processNode("menu_principal", 0)
-
       setNodes(newNodes)
       setEdges(newEdges)
 
-      // Reset zoom e pan ao carregar novos dados
-      setZoom(1)
-      setPan({ x: 0, y: 0 })
+      // Converte para react-flow
+      setRfNodes(
+        newNodes.map((node) => ({
+          id: node.id,
+          data: {
+            label: (
+              <div>
+                <div className="font-bold">{node.label}</div>
+                {node.description && <div className="text-xs text-gray-500">{node.description}</div>}
+                {node.isTerminal && (
+                  <Badge variant="outline" className="mt-1 text-xs bg-red-50">
+                    Terminal
+                  </Badge>
+                )}
+              </div>
+            ),
+          },
+          position: { x: node.x, y: node.y },
+          style: {
+            width: 200,
+            background: node.isTerminal ? "#fef2f2" : "#fff",
+            border: node.isTerminal ? "1px solid #fecaca" : "1px solid #e5e7eb",
+            boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+            borderRadius: 8,
+            zIndex: selectedNode === node.id ? 10 : 1,
+          },
+          sourcePosition: Position.Right,
+          targetPosition: Position.Left,
+          className: selectedNode === node.id ? "ring-2 ring-primary" : "",
+        })),
+      )
+      setRfEdges(
+        newEdges.map((edge) => ({
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          label: `Opção ${edge.label}`,
+          animated: false,
+          style: { stroke: "#d1d5db", strokeWidth: 2 },
+          labelStyle: { fill: "#374151", fontWeight: 500, fontSize: 12, background: "#fff" },
+        })),
+      )
     },
-    [showAllNodes],
+    [showAllNodes, selectedNode],
   )
 
   // Efeito para carregar dados iniciais
@@ -332,6 +374,14 @@ export default function FlowEditor() {
     setEditedOptions(fluxoData[nodeId] || {})
   }
 
+  // Manipulador de clique em nó para react-flow
+  const onNodeClick = useCallback(
+    (_: any, node: RFNode) => {
+      handleNodeClick(node.id)
+    },
+    [handleNodeClick],
+  )
+
   // Salvar alterações
   const handleSave = async () => {
     if (!selectedNode) return
@@ -339,14 +389,6 @@ export default function FlowEditor() {
     setIsSaving(true)
     try {
       // Simulando a requisição para a API
-      // Em produção, substituir por:
-      // const response = await fetch(`http://localhost:3000/api/fluxo/${selectedNode}`, {
-      //   method: 'PATCH',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify(editedOptions)
-      // })
-
-      // Simulando um delay para mostrar o loading
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
       // Atualizar o estado local
@@ -410,37 +452,6 @@ export default function FlowEditor() {
     const newOptions = { ...editedOptions }
     delete newOptions[option]
     setEditedOptions(newOptions)
-  }
-
-  // Funções de zoom e pan
-  const handleZoomIn = () => {
-    setZoom((prev) => Math.min(prev + 0.1, 2))
-  }
-
-  const handleZoomOut = () => {
-    setZoom((prev) => Math.max(prev - 0.1, 0.5))
-  }
-
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (e.button === 0) {
-      // Botão esquerdo do mouse
-      setIsDragging(true)
-      setDragStart({ x: e.clientX, y: e.clientY })
-    }
-  }
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (isDragging) {
-      setPan((prev) => ({
-        x: prev.x + (e.clientX - dragStart.x) / zoom,
-        y: prev.y + (e.clientY - dragStart.y) / zoom,
-      }))
-      setDragStart({ x: e.clientX, y: e.clientY })
-    }
-  }
-
-  const handleMouseUp = () => {
-    setIsDragging(false)
   }
 
   // Exportar fluxo como JSON
@@ -537,142 +548,39 @@ export default function FlowEditor() {
           <CardHeader className="pb-0">
             <CardTitle className="flex justify-between items-center">
               <span>Visualização do Fluxo</span>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="icon" onClick={handleZoomOut}>
-                  <ZoomOut className="h-4 w-4" />
-                </Button>
-                <span className="text-sm">{Math.round(zoom * 100)}%</span>
-                <Button variant="outline" size="icon" onClick={handleZoomIn}>
-                  <ZoomIn className="h-4 w-4" />
-                </Button>
-                <Separator orientation="vertical" className="h-6" />
-                <Button variant="outline" size="icon" className={isDragging ? "bg-muted" : ""}>
-                  <Move className="h-4 w-4" />
-                </Button>
-              </div>
             </CardTitle>
           </CardHeader>
           <CardContent className="h-[500px] relative">
-            <div
-              className="h-full w-full overflow-auto border rounded-md p-4 bg-gray-50 relative"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUp}
-              onMouseLeave={handleMouseUp}
-              style={{ cursor: isDragging ? "grabbing" : "grab" }}
-              ref={canvasRef}
-            >
-              {/* Legenda */}
-              <div className="absolute top-2 right-2 bg-white p-2 rounded shadow-sm text-xs z-10">
-                <div className="flex items-center mb-1">
-                  <div className="w-3 h-3 mr-1 rounded-full bg-green-500" />
-                  <span>Etapa normal</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-3 h-3 mr-1 rounded-full bg-red-500" />
-                  <span>Etapa terminal</span>
-                </div>
+            {/* Legenda */}
+            <div className="absolute top-2 right-2 bg-white p-2 rounded shadow-sm text-xs z-10">
+              <div className="flex items-center mb-1">
+                <div className="w-3 h-3 mr-1 rounded-full bg-green-500" />
+                <span>Etapa normal</span>
               </div>
-
-              {/* Área de desenho com transformação para zoom e pan */}
-              <div
-                className="relative"
-                style={{
-                  width: "2000px",
-                  height: "1500px",
-                  transform: `scale(${zoom}) translate(${pan.x}px, ${pan.y}px)`,
-                  transformOrigin: "0 0",
-                }}
+              <div className="flex items-center">
+                <div className="w-3 h-3 mr-1 rounded-full bg-red-500" />
+                <span>Etapa terminal</span>
+              </div>
+            </div>
+            {/* ReactFlow */}
+            <div style={{ width: "100%", height: 500 }}>
+              <ReactFlow
+                nodes={rfNodes}
+                edges={rfEdges}
+                onNodeClick={onNodeClick}
+                fitView
+                panOnDrag
+                zoomOnScroll
+                zoomOnPinch
+                selectionOnDrag
+                minZoom={0.5}
+                maxZoom={2}
+                proOptions={{ hideAttribution: true }}
               >
-                {/* Conexões */}
-                {edges.map((edge) => {
-                  const sourceNode = nodes.find((n) => n.id === edge.source)
-                  const targetNode = nodes.find((n) => n.id === edge.target)
-
-                  if (!sourceNode || !targetNode) return null
-
-                  // Calcular o ponto médio para o rótulo
-                  const midX = (sourceNode.x + 100 + targetNode.x) / 2
-                  const midY = (sourceNode.y + 25 + targetNode.y + 25) / 2
-
-                  // Calcular ângulo e comprimento da linha
-                  const dx = targetNode.x - (sourceNode.x + 100)
-                  const dy = targetNode.y + 25 - (sourceNode.y + 25)
-                  const angle = Math.atan2(dy, dx)
-                  const length = Math.sqrt(dx * dx + dy * dy)
-
-                  return (
-                    <div key={edge.id} className="absolute">
-                      {/* Linha de conexão */}
-                      <div
-                        className="absolute border-t-2 border-gray-300 transform origin-left"
-                        style={{
-                          left: `${sourceNode.x + 100}px`,
-                          top: `${sourceNode.y + 25}px`,
-                          width: `${length}px`,
-                          transform: `rotate(${angle}rad)`,
-                        }}
-                      />
-
-                      {/* Rótulo da conexão */}
-                      <div
-                        className="absolute bg-white px-2 py-1 rounded-md text-xs border border-gray-200 z-10 shadow-sm"
-                        style={{
-                          left: `${midX}px`,
-                          top: `${midY}px`,
-                          transform: "translate(-50%, -50%)",
-                        }}
-                      >
-                        Opção {edge.label}
-                      </div>
-
-                      {/* Seta no final da linha */}
-                      <div
-                        className="absolute w-3 h-3 border-t-2 border-r-2 border-gray-300 transform rotate-45"
-                        style={{
-                          left: `${targetNode.x - 5}px`,
-                          top: `${targetNode.y + 25}px`,
-                          transform: "translate(-50%, -50%) rotate(45deg)",
-                        }}
-                      />
-                    </div>
-                  )
-                })}
-
-                {/* Nós */}
-                {nodes.map((node) => (
-                  <div
-                    key={node.id}
-                    className={`absolute px-4 py-2 shadow-md rounded-md border cursor-pointer transition-all duration-200 ${
-                      node.isTerminal ? "bg-red-50 border-red-200" : "bg-white border-gray-200"
-                    } ${selectedNode === node.id ? "ring-2 ring-primary" : ""} hover:shadow-lg`}
-                    style={{
-                      left: `${node.x}px`,
-                      top: `${node.y}px`,
-                      width: "200px",
-                      zIndex: selectedNode === node.id ? 10 : 1,
-                    }}
-                    onClick={() => handleNodeClick(node.id)}
-                  >
-                    <div className="flex items-center">
-                      {node.isTerminal ? (
-                        <div className="w-3 h-3 mr-2 rounded-full bg-red-500" />
-                      ) : (
-                        <div className="w-3 h-3 mr-2 rounded-full bg-green-500" />
-                      )}
-                      <div>
-                        <div className="font-bold">{node.label}</div>
-                        {node.description && <div className="text-xs text-gray-500">{node.description}</div>}
-                      </div>
-                    </div>
-                    {node.isTerminal && (
-                      <Badge variant="outline" className="mt-1 text-xs bg-red-50">
-                        Terminal
-                      </Badge>
-                    )}
-                  </div>
-                ))}
-              </div>
+                <MiniMap />
+                <Controls />
+                <Background gap={16} />
+              </ReactFlow>
             </div>
           </CardContent>
         </Card>
