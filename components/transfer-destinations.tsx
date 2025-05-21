@@ -17,6 +17,7 @@ import { Edit, Save, Loader2, CheckCircle, AlertCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { motion } from "framer-motion";
 
 type Destino = {
   id: string;
@@ -231,16 +232,16 @@ export default function TransferDestinations() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Carregando destinos de transferência...</span>
+      <div className="flex items-center justify-center h-64 bg-gradient-to-br from-slate-900/80 to-blue-900/60">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+        <span className="ml-2 text-blue-100">Carregando destinos de transferência...</span>
       </div>
     );
   }
 
   if (error) {
     return (
-      <Alert variant="destructive">
+      <Alert variant="destructive" className="bg-red-500/20 border border-red-500/50 text-red-200">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Erro</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
@@ -249,29 +250,38 @@ export default function TransferDestinations() {
   }
 
   return (
-    <div className="transfer-destinations">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="transfer-destinations bg-gradient-to-br from-slate-900/80 to-blue-900/60 min-h-screen p-4">
+      <motion.div
+        className="mb-6 flex items-center justify-between"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div>
-          <h2 className="text-2xl font-bold">Destinos de Transferência</h2>
-          <p className="text-muted-foreground">
+          <h2 className="text-2xl font-bold text-white">Destinos de Transferência</h2>
+          <p className="text-blue-200">
             Configure os números para onde as transferências serão encaminhadas.
           </p>
         </div>
-        <Button onClick={fetchDestinos} variant="outline">
+        <Button
+          onClick={fetchDestinos}
+          variant="outline"
+          className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+        >
           Atualizar
         </Button>
-      </div>
+      </motion.div>
 
       <div className="grid gap-4 md:grid-cols-2">
         {destinos.map((destino) => (
-          <Card key={destino.id} className="p-4 shadow-md">
+          <Card key={destino.id} className="p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white">
             <div className="flex items-start justify-between mb-2">
               <div>
                 <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-lg">{destino.titulo}</h3>
-                  <Badge variant="outline">{destino.id}</Badge>
+                  <h3 className="font-semibold text-lg text-blue-100">{destino.titulo}</h3>
+                  <Badge variant="outline" className="bg-blue-500/10 border-blue-500/30 text-blue-200">{destino.id}</Badge>
                 </div>
-                <div className="flex items-center text-primary mb-1">
+                <div className="flex items-center text-blue-200 mb-1">
                   <img
                     src="/images/whatsapp.png"
                     alt="WhatsApp"
@@ -280,7 +290,7 @@ export default function TransferDestinations() {
                   <span className="font-medium">{destino.numero}</span>
                 </div>
                 {destino.descricao && (
-                  <div className="text-sm text-muted-foreground">
+                  <div className="text-sm text-blue-300">
                     {destino.descricao}
                   </div>
                 )}
@@ -289,6 +299,7 @@ export default function TransferDestinations() {
                 variant="ghost"
                 size="sm"
                 onClick={() => handleEdit(destino)}
+                className="text-blue-200 hover:text-white hover:bg-white/10"
               >
                 <Edit className="h-4 w-4 mr-2" />
                 Editar
@@ -299,10 +310,10 @@ export default function TransferDestinations() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[90vw] md:max-w-[600px] max-h-[90vh] overflow-y-auto backdrop-blur-md bg-white/5 border-white/10 text-white">
           <DialogHeader>
-            <DialogTitle>Editar Destino de Transferência</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-white-100">Editar Destino de Transferência</DialogTitle>
+            <DialogDescription className="text-white-200">
               Atualize o número de telefone/WhatsApp para "
               {editingDestino?.titulo}".
             </DialogDescription>
@@ -311,7 +322,7 @@ export default function TransferDestinations() {
           {editingDestino && (
             <div className="grid gap-4 py-4">
               <div className="grid gap-2">
-                <Label htmlFor="numero">Número de telefone/WhatsApp</Label>
+                <Label htmlFor="numero" className="text-white-200">Número de telefone/WhatsApp</Label>
                 <div className="flex items-center">
                   <img
                     src="/images/whatsapp.png"
@@ -326,9 +337,10 @@ export default function TransferDestinations() {
                     inputMode="numeric"
                     pattern="\+?\d*"
                     maxLength={20}
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white-200/50"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-xs text-white-300">
                   Formato recomendado: +55 (44) 00000-0000
                 </p>
               </div>
@@ -340,10 +352,15 @@ export default function TransferDestinations() {
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
               disabled={isSaving}
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
             >
               Cancelar
             </Button>
-            <Button onClick={handleSave} disabled={isSaving}>
+            <Button
+              onClick={handleSave}
+              disabled={isSaving}
+              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+            >
               {isSaving ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

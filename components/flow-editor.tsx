@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Loader2, Save, RefreshCw, ArrowRight, X, Plus, Download } from "lucide-react"
+import { Loader2, Save, RefreshCw, ArrowRight, X, Plus, Download, ZoomIn, ZoomOut, Move } from "lucide-react"
 import { toast } from "@/components/ui/use-toast"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { Badge } from "@/components/ui/badge"
@@ -23,6 +23,7 @@ import ReactFlow, {
   Position,
 } from "reactflow"
 import "reactflow/dist/style.css"
+import { motion } from "framer-motion"
 
 // Tipos atualizados para o novo formato da API
 type MenuOpcao = {
@@ -39,7 +40,6 @@ type MenusData = {
 }
 type EtapaTerminal = string
 
-// Tipos auxiliares para o layout do fluxo
 type FlowNode = {
   id: string
   label: string
@@ -239,15 +239,16 @@ export default function FlowEditor() {
           position: { x: node.x, y: node.y },
           style: {
             width: 200,
-            background: node.isTerminal ? "#fef2f2" : "#fff",
-            border: node.isTerminal ? "1px solid #fecaca" : "1px solid #e5e7eb",
-            boxShadow: "0 1px 4px rgba(0,0,0,0.06)",
+            background: node.isTerminal ? "rgba(239,68,68,0.08)" : "rgba(37,99,235,0.08)",
+            border: node.isTerminal ? "1px solid #ef4444" : "1px solid #3b82f6",
+            color: "#fff",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
             borderRadius: 8,
             zIndex: selectedNode === node.id ? 10 : 1,
           },
           sourcePosition: Position.Right,
           targetPosition: Position.Left,
-          className: selectedNode === node.id ? "ring-2 ring-primary" : "",
+          className: selectedNode === node.id ? "ring-2 ring-blue-400" : "",
         })),
       )
       setRfEdges(
@@ -257,8 +258,8 @@ export default function FlowEditor() {
           target: edge.target,
           label: edge.label,
           animated: false,
-          style: { stroke: "#d1d5db", strokeWidth: 2 },
-          labelStyle: { fill: "#374151", fontWeight: 500, fontSize: 12, background: "#fff" },
+          style: { stroke: "#60a5fa", strokeWidth: 2 },
+          labelStyle: { fill: "#93c5fd", fontWeight: 500, fontSize: 12, background: "rgba(0,0,0,0.2)" },
         })),
       )
     },
@@ -378,16 +379,16 @@ export default function FlowEditor() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-2">Carregando menus...</span>
+      <div className="flex items-center justify-center h-64 bg-gradient-to-br from-slate-900/80 to-blue-900/60">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
+        <span className="ml-2 text-blue-100">Carregando menus...</span>
       </div>
     )
   }
 
   if (error) {
     return (
-      <Alert variant="destructive">
+      <Alert variant="destructive" className="bg-red-500/20 border border-red-500/50 text-red-200">
         <AlertTitle>Erro</AlertTitle>
         <AlertDescription>{error}</AlertDescription>
       </Alert>
@@ -395,236 +396,351 @@ export default function FlowEditor() {
   }
 
   return (
-    <div className="flow-editor">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="flow-editor bg-gradient-to-br from-slate-900/80 to-blue-900/60 min-h-screen p-4">
+      <motion.div
+        className="mb-6 flex items-center justify-between"
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <div>
-          <h2 className="text-2xl font-bold">Editor de Fluxo</h2>
-          <p className="text-muted-foreground">Visualize e edite o fluxo de atendimento do seu sistema.</p>
+          <h2 className="text-2xl font-bold text-white">Editor de Fluxo</h2>
+          <p className="text-blue-200">Visualize e edite o fluxo de atendimento do seu sistema.</p>
         </div>
         <div className="flex gap-2">
           <div className="flex items-center space-x-2">
-            <Switch id="show-all" checked={showAllNodes} onCheckedChange={setShowAllNodes} />
-            <Label htmlFor="show-all">Mostrar todos os nós</Label>
+            <Switch
+              id="show-all"
+              checked={showAllNodes}
+              onCheckedChange={setShowAllNodes}
+              className="bg-white/20 data-[state=checked]:bg-blue-600"
+            />
+            <Label htmlFor="show-all" className="text-blue-100">
+              Mostrar todos os nós
+            </Label>
           </div>
-          <Button onClick={fetchMenusData} variant="outline">
+          <Button
+            onClick={fetchMenusData}
+            variant="outline"
+            className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+          >
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
-          <Button onClick={handleExportJSON} variant="outline">
+          <Button
+            onClick={handleExportJSON}
+            variant="outline"
+            className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+          >
             <Download className="h-4 w-4 mr-2" />
             Exportar JSON
           </Button>
         </div>
-      </div>
+      </motion.div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 shadow-sm">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Lista de menus */}
-        <Card className="lg:col-span-1 shadow-md">
-          <CardHeader>
-            <CardTitle>Menus do Fluxo</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[500px] pr-4">
-              {Object.keys(menusData).map((menuId) => (
-                <div
-                  key={menuId}
-                  className={`mb-2 p-2 rounded cursor-pointer hover:bg-gray-100 ${
-                    selectedNode === menuId ? "bg-gray-100 border-l-4 border-primary" : ""
-                  }`}
-                  onClick={() => handleNodeClick(menuId)}
-                >
-                  <div className="flex items-center">
-                    {etapasTerminais.includes(menuId) ||
-                    !menusData[menuId].opcoes ||
-                    menusData[menuId].opcoes.length === 0 ? (
-                      <div className="w-3 h-3 mr-2 rounded-full bg-red-500" />
-                    ) : (
-                      <div className="w-3 h-3 mr-2 rounded-full bg-green-500" />
-                    )}
-                    <div>
-                      <div className="font-medium">{menusData[menuId].titulo}</div>
-                      <div className="text-xs text-gray-500">
-                        {menusData[menuId].opcoes?.length || 0} opções
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.1 }}
+        >
+          <Card className="lg:col-span-1 backdrop-blur-sm bg-white/5 border-white/10 shadow-xl text-white">
+            <CardHeader className="border-b border-white/10">
+              <CardTitle className="text-blue-100">Menus do Fluxo</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+              <ScrollArea className="h-[500px] pr-4">
+                {Object.keys(menusData).map((menuId) => (
+                  <div
+                    key={menuId}
+                    className={`p-3 cursor-pointer hover:bg-white/5 transition-colors ${
+                      selectedNode === menuId
+                        ? "bg-blue-600/20 border-l-2 border-blue-400"
+                        : "border-l-2 border-transparent"
+                    }`}
+                    onClick={() => handleNodeClick(menuId)}
+                  >
+                    <div className="flex items-center">
+                      {etapasTerminais.includes(menuId) ||
+                      !menusData[menuId].opcoes ||
+                      menusData[menuId].opcoes.length === 0 ? (
+                        <div className="w-3 h-3 mr-2 rounded-full bg-gradient-to-br from-red-500 to-red-600" />
+                      ) : (
+                        <div className="w-3 h-3 mr-2 rounded-full bg-gradient-to-br from-green-500 to-green-600" />
+                      )}
+                      <div>
+                        <div className="font-medium text-blue-50">{menusData[menuId].titulo}</div>
+                        <div className="text-xs text-blue-300">
+                          {menusData[menuId].opcoes?.length || 0} opções
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              ))}
-            </ScrollArea>
-          </CardContent>
-        </Card>
+                ))}
+              </ScrollArea>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Visualização do fluxo */}
-        <Card className="lg:col-span-2 shadow-md">
-          <CardHeader className="pb-0">
-            <CardTitle className="flex justify-between items-center">
-              <span>Visualização do Fluxo</span>
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="h-[500px] relative">
-            {/* Legenda */}
-            <div className="absolute top-2 right-2 bg-white p-2 rounded shadow-sm text-xs z-10">
-              <div className="flex items-center mb-1">
-                <div className="w-3 h-3 mr-1 rounded-full bg-green-500" />
-                <span>Menu normal</span>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="lg:col-span-2"
+        >
+          <Card className="backdrop-blur-sm bg-white/5 border-white/10 shadow-xl text-white">
+            <CardHeader className="pb-0 border-b border-white/10">
+              <CardTitle className="flex justify-between items-center text-blue-100">
+                <span>Visualização do Fluxo</span>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 rounded-full bg-white/5 border-white/20 text-blue-200 hover:bg-white/10 hover:text-white"
+                    onClick={() => {
+                      const flow = document.querySelector(".react-flow__renderer") as HTMLElement
+                      if (flow) flow.style.zoom = `${Math.max(0.5, Math.min(2, (parseFloat(flow.style.zoom || "1") - 0.1)))}`
+                    }}
+                  >
+                    <ZoomOut className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm text-blue-200">Zoom</span>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 rounded-full bg-white/5 border-white/20 text-blue-200 hover:bg-white/10 hover:text-white"
+                    onClick={() => {
+                      const flow = document.querySelector(".react-flow__renderer") as HTMLElement
+                      if (flow) flow.style.zoom = `${Math.max(0.5, Math.min(2, (parseFloat(flow.style.zoom || "1") + 0.1)))}`
+                    }}
+                  >
+                    <ZoomIn className="h-4 w-4" />
+                  </Button>
+                  <Separator orientation="vertical" className="h-6 bg-white/20" />
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    className="h-8 w-8 rounded-full bg-white/5 border-white/20 text-blue-200 hover:bg-white/10 hover:text-white"
+                  >
+                    <Move className="h-4 w-4" />
+                  </Button>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="h-[500px] relative p-0">
+              {/* Legenda */}
+              <div className="absolute top-2 right-2 backdrop-blur-sm bg-black/30 p-2 rounded shadow-lg text-xs z-10 border border-white/10">
+                <div className="flex items-center mb-1">
+                  <div className="w-3 h-3 mr-1 rounded-full bg-gradient-to-br from-green-500 to-green-600" />
+                  <span className="text-blue-100">Menu normal</span>
+                </div>
+                <div className="flex items-center">
+                  <div className="w-3 h-3 mr-1 rounded-full bg-gradient-to-br from-red-500 to-red-600" />
+                  <span className="text-blue-100">Menu terminal</span>
+                </div>
               </div>
-              <div className="flex items-center">
-                <div className="w-3 h-3 mr-1 rounded-full bg-red-500" />
-                <span>Menu terminal</span>
+              {/* ReactFlow */}
+              <div style={{ width: "100%", height: 500 }}>
+                <ReactFlow
+                  nodes={rfNodes.map((node) => ({
+                    ...node,
+                    style: {
+                      ...node.style,
+                      background: node.isTerminal ? "rgba(239,68,68,0.08)" : "rgba(37,99,235,0.08)",
+                      border: node.isTerminal ? "1px solid #ef4444" : "1px solid #3b82f6",
+                      color: "#fff",
+                      boxShadow: "0 2px 8px rgba(0,0,0,0.12)",
+                    },
+                    className: `${node.className} ${node.isTerminal
+                      ? "bg-red-500/10 border-red-500/30"
+                      : "bg-blue-600/10 border-blue-500/30"
+                    } ${selectedNode === node.id ? "ring-2 ring-blue-400" : ""}`,
+                  }))}
+                  edges={rfEdges.map((edge) => ({
+                    ...edge,
+                    style: { stroke: "#60a5fa", strokeWidth: 2 },
+                    labelStyle: { fill: "#93c5fd", fontWeight: 500, fontSize: 12, background: "rgba(0,0,0,0.2)" },
+                  }))}
+                  onNodeClick={onNodeClick}
+                  fitView
+                  panOnDrag
+                  zoomOnScroll
+                  zoomOnPinch
+                  selectionOnDrag
+                  minZoom={0.5}
+                  maxZoom={2}
+                  proOptions={{ hideAttribution: true }}
+                >
+                  <MiniMap />
+                  <Controls />
+                  <Background gap={16} />
+                </ReactFlow>
               </div>
-            </div>
-            {/* ReactFlow */}
-            <div style={{ width: "100%", height: 500 }}>
-              <ReactFlow
-                nodes={rfNodes}
-                edges={rfEdges}
-                onNodeClick={onNodeClick}
-                fitView
-                panOnDrag
-                zoomOnScroll
-                zoomOnPinch
-                selectionOnDrag
-                minZoom={0.5}
-                maxZoom={2}
-                proOptions={{ hideAttribution: true }}
-              >
-                <MiniMap />
-                <Controls />
-                <Background gap={16} />
-              </ReactFlow>
-            </div>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </motion.div>
       </div>
 
       {/* Editor de menu */}
-      {selectedNode && editedMenu ? (
-        <Card className="mt-4 shadow-md">
-          <CardHeader>
-            <CardTitle>
-              Editar Menu: {editedMenu.titulo}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="visual">
-              <TabsList className="mb-4">
-                <TabsTrigger value="visual">Editor Visual</TabsTrigger>
-                <TabsTrigger value="json">Editor JSON</TabsTrigger>
-              </TabsList>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+        className="mt-4"
+      >
+        {selectedNode && editedMenu ? (
+          <Card className="backdrop-blur-sm bg-white/5 border-white/10 shadow-xl text-white">
+            <CardHeader className="border-b border-white/10">
+              <CardTitle className="text-blue-100">
+                Editar Menu: {editedMenu.titulo}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="visual" className="w-full">
+                <TabsList className="mb-4 bg-white/5 text-blue-200">
+                  <TabsTrigger
+                    value="visual"
+                    className="data-[state=active]:bg-blue-600 data-[state=active]:text-white"
+                  >
+                    Editor Visual
+                  </TabsTrigger>
+                  <TabsTrigger value="json" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+                    Editor JSON
+                  </TabsTrigger>
+                </TabsList>
 
-              <TabsContent value="visual">
-                <div className="space-y-4">
-                  <div className="grid gap-4">
-                    <div className="flex items-center gap-2">
-                      <Label className="w-24 text-right">Título:</Label>
-                      <Input
-                        value={editedMenu.titulo}
-                        onChange={(e) => handleMenuFieldChange("titulo", e.target.value)}
-                        placeholder="Título do menu"
-                      />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Label className="w-24 text-right">Descrição:</Label>
-                      <Input
-                        value={editedMenu.descricao}
-                        onChange={(e) => handleMenuFieldChange("descricao", e.target.value)}
-                        placeholder="Descrição"
-                      />
-                    </div>
-                  </div>
-                  <Separator />
-                  <div className="font-semibold mb-2">Opções</div>
-                  <div className="grid gap-2">
-                    {editedMenu.opcoes.map((op, idx) => (
-                      <div key={idx} className="flex items-center gap-2">
-                        <Label className="w-12 text-right">ID:</Label>
+                <TabsContent value="visual">
+                  <div className="space-y-4">
+                    <div className="grid gap-4">
+                      <div className="flex items-center gap-2">
+                        <Label className="w-24 text-right text-blue-200">Título:</Label>
                         <Input
-                          value={op.id}
-                          onChange={(e) => handleOptionChange(idx, "id", e.target.value)}
-                          placeholder="ID"
-                          className="w-16"
+                          value={editedMenu.titulo}
+                          onChange={(e) => handleMenuFieldChange("titulo", e.target.value)}
+                          placeholder="Título do menu"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
                         />
-                        <Label className="w-16 text-right">Título:</Label>
-                        <Input
-                          value={op.titulo}
-                          onChange={(e) => handleOptionChange(idx, "titulo", e.target.value)}
-                          placeholder="Título"
-                          className="flex-1"
-                        />
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleRemoveOption(idx)}
-                          className="text-red-500"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
                       </div>
-                    ))}
+                      <div className="flex items-center gap-2">
+                        <Label className="w-24 text-right text-blue-200">Descrição:</Label>
+                        <Input
+                          value={editedMenu.descricao}
+                          onChange={(e) => handleMenuFieldChange("descricao", e.target.value)}
+                          placeholder="Descrição"
+                          className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+                        />
+                      </div>
+                    </div>
+                    <Separator className="bg-white/10" />
+                    <div className="font-semibold mb-2 text-blue-100">Opções</div>
+                    <div className="grid gap-2">
+                      {editedMenu.opcoes.map((op, idx) => (
+                        <div key={idx} className="flex items-center gap-2">
+                          <Label className="w-12 text-right text-blue-200">ID:</Label>
+                          <Input
+                            value={op.id}
+                            onChange={(e) => handleOptionChange(idx, "id", e.target.value)}
+                            placeholder="ID"
+                            className="w-16 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+                          />
+                          <Label className="w-16 text-right text-blue-200">Título:</Label>
+                          <Input
+                            value={op.titulo}
+                            onChange={(e) => handleOptionChange(idx, "titulo", e.target.value)}
+                            placeholder="Título"
+                            className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+                          />
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveOption(idx)}
+                            className="text-red-400 hover:text-red-300 hover:bg-white/10"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex justify-between">
+                      <Button
+                        variant="outline"
+                        onClick={handleAddOption}
+                        className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+                      >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar Opção
+                      </Button>
+                      <Button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+                      >
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Salvando...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            Salvar Alterações
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <Button variant="outline" onClick={handleAddOption}>
-                      <Plus className="h-4 w-4 mr-2" />
-                      Adicionar Opção
-                    </Button>
-                    <Button onClick={handleSave} disabled={isSaving}>
-                      {isSaving ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Salvando...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="mr-2 h-4 w-4" />
-                          Salvar Alterações
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              </TabsContent>
+                </TabsContent>
 
-              <TabsContent value="json">
-                <div className="space-y-4">
-                  <pre className="bg-gray-100 p-4 rounded overflow-auto h-64 text-sm">
-                    {JSON.stringify(editedMenu, null, 2)}
-                  </pre>
-                  <div className="flex justify-end">
-                    <Button onClick={handleSave} disabled={isSaving}>
-                      {isSaving ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Salvando...
-                        </>
-                      ) : (
-                        <>
-                          <Save className="mr-2 h-4 w-4" />
-                          Salvar Alterações
-                        </>
-                      )}
-                    </Button>
+                <TabsContent value="json">
+                  <div className="space-y-4">
+                    <pre className="bg-black/30 p-4 rounded overflow-auto h-64 text-sm text-blue-200 border border-white/10">
+                      {JSON.stringify(editedMenu, null, 2)}
+                    </pre>
+                    <div className="flex justify-end">
+                      <Button
+                        onClick={handleSave}
+                        disabled={isSaving}
+                        className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+                      >
+                        {isSaving ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Salvando...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="mr-2 h-4 w-4" />
+                            Salvar Alterações
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="backdrop-blur-sm bg-white/5 border-white/10 shadow-xl text-white">
+            <CardHeader className="border-b border-white/10">
+              <CardTitle className="text-blue-100">Editor de Menu</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center justify-center py-8 text-center">
+                <div className="mb-4 bg-blue-500/10 p-4 rounded-full">
+                  <ArrowRight className="h-12 w-12 text-blue-400" />
                 </div>
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card className="mt-4 shadow-md">
-          <CardHeader>
-            <CardTitle>Editor de Menu</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-col items-center justify-center py-8 text-center text-muted-foreground">
-              <div className="mb-4">
-                <ArrowRight className="h-12 w-12" />
+                <h3 className="text-lg font-medium text-white">Selecione um menu para editar</h3>
+                <p className="mt-2 text-blue-200">
+                  Clique em um menu no fluxograma ou na lista para editar suas opções.
+                </p>
               </div>
-              <h3 className="text-lg font-medium">Selecione um menu para editar</h3>
-              <p className="mt-2">Clique em um menu no fluxograma ou na lista para editar suas opções.</p>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+            </CardContent>
+          </Card>
+        )}
+      </motion.div>
     </div>
   )
 }
