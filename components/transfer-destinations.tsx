@@ -96,6 +96,41 @@ export default function TransferDestinations() {
     }
   };
 
+  // Formatar o número enquanto digita
+  function formatPhoneNumber(value: string) {
+
+    let digits = value.replace(/\D/g, "");
+    digits = digits.slice(0, 13);
+
+    // Monta o formato +55 (44) 99999-9999
+    let formatted = "";
+    if (digits.length > 0) {
+      formatted += "+" + digits.slice(0, 2); 
+    }
+    if (digits.length > 2) {
+      formatted += " (" + digits.slice(2, 4) + ")"; 
+    }
+    if (digits.length > 4) {
+      formatted += " " + digits.slice(4, 9);
+    }
+    if (digits.length > 9) {
+      formatted += "-" + digits.slice(9, 13); 
+    }
+    return formatted;
+  }
+
+  // Extrair apenas os dígitos do número formatado
+  function getOnlyDigits(value: string) {
+    return value.replace(/\D/g, "");
+  }
+
+  // Validar se o número tem código de país e DDD
+  function isValidPhoneNumber(value: string) {
+    const digits = getOnlyDigits(value);
+    // Deve ter pelo menos 13 dígitos: 2 (país) + 2 (DDD) + 9 (número)
+    return digits.length >= 13;
+  }
+
   const handleEdit = async (destino: Destino) => {
     setSaveSuccess(null);
     setIsDialogOpen(true);
@@ -103,19 +138,46 @@ export default function TransferDestinations() {
     setEditingDestino(apiDestino || destino);
   };
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let inputValue = e.target.value;
+
+    inputValue = getOnlyDigits(inputValue);
+    // Formata o número enquanto digita
+    setEditingDestino((prev) =>
+      prev
+        ? {
+            ...prev,
+            numero: formatPhoneNumber(inputValue),
+          }
+        : null
+    );
+  };
+
   const handleSave = async () => {
     if (!editingDestino) return;
+
+    if (!isValidPhoneNumber(editingDestino.numero)) {
+      toast({
+        title: "Número inválido",
+        description:
+          "Inclua o código do país (ex: 55) e o DDD (ex: 44) no número.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     setIsSaving(true);
     setSaveSuccess(null);
 
     try {
+      const numeroSomenteDigitos = getOnlyDigits(editingDestino.numero);
+
       const response = await fetch(
         `http://localhost:3000/api/destinos/${editingDestino.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ conteudo: editingDestino.numero }),
+          body: JSON.stringify({ conteudo: numeroSomenteDigitos }),
         }
       );
 
@@ -123,7 +185,9 @@ export default function TransferDestinations() {
 
       setDestinos(
         destinos.map((dest) =>
-          dest.id === editingDestino.id ? editingDestino : dest
+          dest.id === editingDestino.id
+            ? { ...editingDestino, numero: formatPhoneNumber(numeroSomenteDigitos) }
+            : dest
         )
       );
       setSaveSuccess(true);
@@ -240,17 +304,15 @@ export default function TransferDestinations() {
                   <Input
                     id="numero"
                     value={editingDestino.numero}
-                    onChange={(e) =>
-                      setEditingDestino({
-                        ...editingDestino,
-                        numero: e.target.value,
-                      })
-                    }
-                    placeholder="+55 00 00000-0000"
+                    onChange={handleInputChange}
+                    placeholder="+55 (44) 00000-0000"
+                    inputMode="numeric"
+                    pattern="\+?\d*"
+                    maxLength={20}
                   />
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Formato recomendado: +55 00 00000-0000
+                  Formato recomendado: +55 (44) 00000-0000
                 </p>
               </div>
             </div>
