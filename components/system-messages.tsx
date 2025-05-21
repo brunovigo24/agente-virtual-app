@@ -37,11 +37,21 @@ export default function SystemMessages() {
     fetchMensagens()
   }, [])
 
+  // Função utilitária para requisições autenticadas
+  function getAuthHeaders() {
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null
+    return token ? { Authorization: `Bearer ${token}` } : {}
+  }
+
   const fetchMensagens = async () => {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch("http://localhost:3000/api/mensagens")
+      const response = await fetch("http://localhost:3000/api/mensagens", {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      })
       if (!response.ok) throw new Error("Erro ao buscar mensagens")
       const data = await response.json()
       const mensagensArray = Object.entries(data).map(([id, conteudo]) => {
@@ -74,7 +84,10 @@ export default function SystemMessages() {
         `http://localhost:3000/api/mensagens/${editingMessage.id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+          },
           body: JSON.stringify({ conteudo: editingMessage.conteudo }),
         }
       )

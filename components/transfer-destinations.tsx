@@ -34,6 +34,12 @@ export default function TransferDestinations() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
 
+  // Função utilitária para requisições autenticadas
+  function getAuthHeaders() {
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   useEffect(() => {
     fetchDestinos();
   }, []);
@@ -42,7 +48,11 @@ export default function TransferDestinations() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:3000/api/destinos");
+      const response = await fetch("http://localhost:3000/api/destinos", {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
       if (!response.ok) throw new Error("Erro ao buscar destinos");
       const data = await response.json();
 
@@ -77,7 +87,11 @@ export default function TransferDestinations() {
 
   const fetchDestinoById = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/destinos/${id}`);
+      const response = await fetch(`http://localhost:3000/api/destinos/${id}`, {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
       if (!response.ok) throw new Error("Erro ao buscar destino");
       const data = await response.json();
       return {
@@ -176,7 +190,10 @@ export default function TransferDestinations() {
         `http://localhost:3000/api/destinos/${editingDestino.id}`,
         {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+          },
           body: JSON.stringify({ conteudo: numeroSomenteDigitos }),
         }
       );

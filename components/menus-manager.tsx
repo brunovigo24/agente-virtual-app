@@ -38,6 +38,12 @@ export default function MenusManager() {
   const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null)
   const [isCreating, setIsCreating] = useState(false)
 
+  // Função utilitária para requisições autenticadas
+  function getAuthHeaders() {
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null
+    return token ? { Authorization: `Bearer ${token}` } : {}
+  }
+
   useEffect(() => {
     fetchMenus()
   }, [])
@@ -46,7 +52,11 @@ export default function MenusManager() {
     setIsLoading(true)
     setError(null)
     try {
-      const response = await fetch("http://localhost:3000/api/menus")
+      const response = await fetch("http://localhost:3000/api/menus", {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      })
       if (!response.ok) throw new Error("Erro ao buscar menus")
       const data = await response.json()
       const menusArray = Object.entries(data).map(([id, menu]: [string, any]) => ({
@@ -94,7 +104,10 @@ export default function MenusManager() {
           : `http://localhost:3000/api/menus/${editingMenu.id}`,
         {
           method: isCreating ? "POST" : "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...getAuthHeaders(),
+          },
           body: JSON.stringify({
             titulo: editingMenu.titulo,
             descricao: editingMenu.descricao,
