@@ -60,6 +60,13 @@ export default function WhatsAppInstances() {
   const [newInstanceNumber, setNewInstanceNumber] = useState("")
   const [isCreating, setIsCreating] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [qrData, setQrData] = useState<Record<string, {
+    loading: boolean,
+    error: string | null,
+    qrBase64: string | null,
+    pairingCode: string | null,
+    code: string | null,
+  }>>({})
 
   // Carregar instâncias
   useEffect(() => {
@@ -81,6 +88,7 @@ export default function WhatsAppInstances() {
 
   const fetchInstances = async () => {
     setIsLoading(true)
+    setExpandedInstance(null)
     try {
       const response = await fetch('http://localhost:3000/api/evolution/instance/fetchInstances', {
         headers: getAuthHeaders(),
@@ -192,7 +200,9 @@ export default function WhatsAppInstances() {
 
   const handleDisconnectInstance = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/evolution/instance/logout/${id}`, {
+      const instance = instances.find(i => i.id === id)
+      if (!instance) throw new Error("Instância não encontrada")
+      const response = await fetch(`http://localhost:3000/api/evolution/instance/logout/${instance.name}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       })
@@ -263,6 +273,42 @@ export default function WhatsAppInstances() {
       description: message,
       open: true,
     })
+  }
+
+  // Função para buscar QR Code e Pairing Code
+  const fetchQrData = async (instanceName: string) => {
+    setQrData(prev => ({
+      ...prev,
+      [instanceName]: { loading: true, error: null, qrBase64: null, pairingCode: null, code: null }
+    }))
+    try {
+      const response = await fetch(`http://localhost:3000/api/evolution/instance/connect/${instanceName}`, {
+        headers: getAuthHeaders(),
+      })
+      if (!response.ok) throw new Error("Erro ao buscar QR Code")
+      const data = await response.json()
+      setQrData(prev => ({
+        ...prev,
+        [instanceName]: {
+          loading: false,
+          error: null,
+          qrBase64: data.base64 || null,
+          pairingCode: data.pairingCode || null,
+          code: data.code || null,
+        }
+      }))
+    } catch (error: any) {
+      setQrData(prev => ({
+        ...prev,
+        [instanceName]: {
+          loading: false,
+          error: error.message || "Erro desconhecido",
+          qrBase64: null,
+          pairingCode: null,
+          code: null,
+        }
+      }))
+    }
   }
 
   return (
@@ -435,12 +481,73 @@ export default function WhatsAppInstances() {
                       transition={{ duration: 0.3 }}
                       className="mt-4 pt-4 border-t border-white/10"
                     >
+                      {/* QR Code e Pairing Code só se desconectado */}
+                      {instance.connectionStatus !== "connected" && (
+                        <div className="mb-6">
+                          <div className="mb-2 text-blue-200 text-sm">
+                            Para conectar, escaneie o QR Code com o WhatsApp
+                          </div>
+                          <div className="flex gap-2 mb-2 flex-wrap">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-blue-500/10 text-blue-200 border-blue-500/30 hover:bg-blue-500/20"
+                              onClick={e => {
+                                e.stopPropagation()
+                                fetchQrData(instance.name)
+                              }}
+                              disabled={qrData[instance.name]?.loading}
+                            >
+                              {qrData[instance.name]?.loading ? (
+                                <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Gerando QR Code...</>
+                              ) : (
+                                <>Gerar QR Code</>
+                              )}
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="bg-blue-500/10 text-blue-200 border-blue-500/30 hover:bg-blue-500/20"
+                              onClick={e => {
+                                e.stopPropagation()
+                                fetchQrData(instance.name)
+                              }}
+                              disabled={qrData[instance.name]?.loading}
+                            >
+                              {qrData[instance.name]?.loading ? (
+                                <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Gerando Código...</>
+                              ) : (
+                                <>Gerar Código de Pareamento</>
+                              )}
+                            </Button>
+                          </div>
+                          {/* Exibição do QR Code e Pairing Code */}
+                          {qrData[instance.name]?.error && (
+                            <div className="text-red-400 text-xs mb-2">{qrData[instance.name]?.error}</div>
+                          )}
+                          {qrData[instance.name]?.qrBase64 && (
+                            <div className="flex flex-col items-center mb-2">
+                              <img src={String(qrData[instance.name]?.qrBase64 || "")} alt="QR Code" className="w-48 h-48 bg-white rounded p-2" />
+                              <div className="text-xs text-blue-200 mt-1">Escaneie o QR Code acima com o WhatsApp</div>
+                            </div>
+                          )}
+                          {qrData[instance.name]?.pairingCode && (
+                            <div className="flex flex-col items-center mb-2">
+                              <div className="font-mono text-lg bg-white/10 border border-white/20 rounded px-3 py-2 text-blue-100">
+                                {qrData[instance.name]?.pairingCode}
+                              </div>
+                              <div className="text-xs text-blue-200 mt-1">Código de pareamento</div>
+                            </div>
+                          )}
+                        </div>
+                      )}
+
                       <div className="mb-4">
                         <label className="block text-sm font-medium text-blue-200 mb-1">Token</label>
                         <div className="flex items-center">
                           <div className="relative flex-1">
                             <Input
-                              value={showToken[instance.id] ? instance.token : "********************************"}
+                              value={showToken[instance.id] ? (instance.token ?? "") : "********************************"}
                               readOnly
                               className="pr-16 font-mono text-sm bg-white/10 border-white/20 text-white"
                             />
@@ -475,7 +582,7 @@ export default function WhatsAppInstances() {
                       <div className="mb-4">
                         <label className="block text-sm font-medium text-blue-200 mb-1">JID</label>
                         <div className="flex items-center">
-                          <Input value={instance.ownerJid} readOnly className="pr-8 font-mono text-sm bg-white/10 border-white/20 text-white" />
+                          <Input value={instance.ownerJid ?? ""} readOnly className="pr-8 font-mono text-sm bg-white/10 border-white/20 text-white" />
                           <Button
                             variant="ghost"
                             size="icon"
@@ -495,9 +602,10 @@ export default function WhatsAppInstances() {
                           variant="outline"
                           size="sm"
                           className="bg-blue-500/10 text-blue-200 border-blue-500/30 hover:bg-blue-500/20"
-                          onClick={(e) => {
+                          onClick={e => {
                             e.stopPropagation()
-                            handleRestartInstance(instance.id)
+                            setExpandedInstance(instance.id)
+                            fetchQrData(instance.name)
                           }}
                         >
                           <RotateCw className="h-3 w-3 mr-1" />
@@ -542,9 +650,10 @@ export default function WhatsAppInstances() {
                         variant="outline"
                         size="sm"
                         className="bg-blue-500/10 text-blue-200 border-blue-500/30 hover:bg-blue-500/20"
-                        onClick={(e) => {
+                        onClick={e => {
                           e.stopPropagation()
-                          handleRestartInstance(instance.id)
+                          setExpandedInstance(instance.id)
+                          fetchQrData(instance.name)
                         }}
                       >
                         <RotateCw className="h-3 w-3 mr-1" />
