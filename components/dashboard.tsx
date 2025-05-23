@@ -315,18 +315,9 @@ export default function Dashboard() {
                 </div>
               )}
               <main className="flex-1 overflow-auto p-4">
-                <AnimatePresence mode="wait">
-                  <motion.div
-                    key={`${activeContent}-${key}`}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
-                    className="w-full"
-                  >
-                    {renderContent()}
-                  </motion.div>
-                </AnimatePresence>
+                <div className="w-full">
+                  {renderContent()}
+                </div>
               </main>
             </div>
           </SidebarInset>
