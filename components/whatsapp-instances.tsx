@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -51,7 +51,6 @@ export default function WhatsAppInstances() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState("all")
-  const [expandedInstance, setExpandedInstance] = useState<string | null>(null)
   const [showToken, setShowToken] = useState<Record<string, boolean>>({})
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [instanceToDelete, setInstanceToDelete] = useState<WhatsAppInstance | null>(null)
@@ -67,6 +66,9 @@ export default function WhatsAppInstances() {
     pairingCode: string | null,
     code: string | null,
   }>>({})
+  const [modalInstance, setModalInstance] = useState<WhatsAppInstance | null>(null)
+  const [pollingActive, setPollingActive] = useState<Record<string, boolean>>({})
+  const pollingIntervalRef = useRef<Record<string, NodeJS.Timeout | null>>({})
 
   // Carregar instâncias
   useEffect(() => {
@@ -88,7 +90,6 @@ export default function WhatsAppInstances() {
 
   const fetchInstances = async () => {
     setIsLoading(true)
-    setExpandedInstance(null)
     try {
       const response = await fetch('http://localhost:3000/api/evolution/instance/fetchInstances', {
         headers: getAuthHeaders(),
@@ -255,10 +256,6 @@ export default function WhatsAppInstances() {
     }
   }
 
-  const toggleExpandInstance = (id: string) => {
-    setExpandedInstance(expandedInstance === id ? null : id)
-  }
-
   const toggleShowToken = (id: string) => {
     setShowToken((prev) => ({
       ...prev,
@@ -275,28 +272,44 @@ export default function WhatsAppInstances() {
     })
   }
 
-  // Função para buscar QR Code e Pairing Code
-  const fetchQrData = async (instanceName: string) => {
-    setQrData(prev => ({
-      ...prev,
-      [instanceName]: { loading: true, error: null, qrBase64: null, pairingCode: null, code: null }
-    }))
+  // Função para buscar QR Code e Pairing Code (agora pode ser chamada pelo polling)
+  const fetchQrData = async (instanceName: string, { silent = false } = {}) => {
+    if (!silent) {
+      setQrData(prev => ({
+        ...prev,
+        [instanceName]: { loading: true, error: null, qrBase64: null, pairingCode: null, code: null }
+      }))
+    }
     try {
       const response = await fetch(`http://localhost:3000/api/evolution/instance/connect/${instanceName}`, {
         headers: getAuthHeaders(),
       })
       if (!response.ok) throw new Error("Erro ao buscar QR Code")
       const data = await response.json()
-      setQrData(prev => ({
-        ...prev,
-        [instanceName]: {
-          loading: false,
-          error: null,
-          qrBase64: data.base64 || null,
-          pairingCode: data.pairingCode || null,
-          code: data.code || null,
+      setQrData((prev: typeof qrData) => {
+        // Só atualiza se mudou
+        if (prev[instanceName]?.qrBase64 !== data.base64) {
+          return {
+            ...prev,
+            [instanceName]: {
+              loading: false,
+              error: null,
+              qrBase64: data.base64 || null,
+              pairingCode: data.pairingCode || null,
+              code: data.code || null,
+            }
+          }
+        } else {
+          return {
+            ...prev,
+            [instanceName]: {
+              ...prev[instanceName],
+              loading: false,
+              error: null,
+            }
+          }
         }
-      }))
+      })
     } catch (error: any) {
       setQrData(prev => ({
         ...prev,
@@ -310,6 +323,49 @@ export default function WhatsAppInstances() {
       }))
     }
   }
+
+  // Iniciar polling ao clicar em Gerar QR Code
+  const handleStartQrPolling = (instanceName: string) => {
+    setPollingActive(prev => ({ ...prev, [instanceName]: true }))
+    fetchQrData(instanceName)
+  }
+
+  // Parar polling
+  const stopQrPolling = (instanceName: string) => {
+    setPollingActive(prev => ({ ...prev, [instanceName]: false }))
+    if (pollingIntervalRef.current[instanceName]) {
+      clearInterval(pollingIntervalRef.current[instanceName]!)
+      pollingIntervalRef.current[instanceName] = null
+    }
+  }
+
+  // Polling effect
+  useEffect(() => {
+    if (!modalInstance) return
+    const instanceName = modalInstance.name
+    if (pollingActive[instanceName] && modalInstance.connectionStatus !== "connected") {
+      // Inicia polling
+      if (pollingIntervalRef.current[instanceName]) {
+        clearInterval(pollingIntervalRef.current[instanceName]!)
+      }
+      pollingIntervalRef.current[instanceName] = setInterval(() => {
+        fetchQrData(instanceName, { silent: true })
+      }, 5000)
+    } else {
+      // Para polling
+      if (pollingIntervalRef.current[instanceName]) {
+        clearInterval(pollingIntervalRef.current[instanceName]!)
+        pollingIntervalRef.current[instanceName] = null
+      }
+    }
+    // Limpa ao desmontar/modal fechar
+    return () => {
+      if (pollingIntervalRef.current[instanceName]) {
+        clearInterval(pollingIntervalRef.current[instanceName]!)
+        pollingIntervalRef.current[instanceName] = null
+      }
+    }
+  }, [modalInstance, pollingActive, modalInstance?.connectionStatus])
 
   return (
     <div className="transfer-destinations bg-gradient-to-br from-slate-900/80 to-blue-900/60 min-h-screen p-4">
@@ -397,9 +453,8 @@ export default function WhatsAppInstances() {
             >
               <Card
                 className={`p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white overflow-hidden transition-all duration-300 ${
-                  expandedInstance === instance.id ? "ring-2 ring-blue-500" : "hover:shadow-md"
+                  instance.connectionStatus === "connected" ? "ring-2 ring-green-500" : "ring-2 ring-red-500"
                 }`}
-                onClick={() => toggleExpandInstance(instance.id)}
               >
                 <CardHeader className="flex flex-row items-center justify-between p-0 pb-2 border-b border-white/10">
                   <CardTitle className="text-lg font-semibold text-blue-100">{instance.name}</CardTitle>
@@ -419,7 +474,7 @@ export default function WhatsAppInstances() {
                       className="h-8 w-8 text-blue-200 hover:text-white hover:bg-white/10"
                       onClick={(e) => {
                         e.stopPropagation()
-                        toggleExpandInstance(instance.id)
+                        setModalInstance(instance)
                       }}
                     >
                       <Settings className="h-4 w-4" />
@@ -472,224 +527,6 @@ export default function WhatsAppInstances() {
                       <span className="font-semibold text-blue-100">{instance._count.Message}</span>
                     </div>
                   </div>
-
-                  {expandedInstance === instance.id && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: "auto" }}
-                      exit={{ opacity: 0, height: 0 }}
-                      transition={{ duration: 0.3 }}
-                      className="mt-4 pt-4 border-t border-white/10"
-                    >
-                      {/* QR Code e Pairing Code só se desconectado */}
-                      {instance.connectionStatus !== "connected" && (
-                        <div className="mb-6">
-                          <div className="mb-2 text-blue-200 text-sm">
-                            Para conectar, escaneie o QR Code com o WhatsApp
-                          </div>
-                          <div className="flex gap-2 mb-2 flex-wrap">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="bg-blue-500/10 text-blue-200 border-blue-500/30 hover:bg-blue-500/20"
-                              onClick={e => {
-                                e.stopPropagation()
-                                fetchQrData(instance.name)
-                              }}
-                              disabled={qrData[instance.name]?.loading}
-                            >
-                              {qrData[instance.name]?.loading ? (
-                                <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Gerando QR Code...</>
-                              ) : (
-                                <>Gerar QR Code</>
-                              )}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              className="bg-blue-500/10 text-blue-200 border-blue-500/30 hover:bg-blue-500/20"
-                              onClick={e => {
-                                e.stopPropagation()
-                                fetchQrData(instance.name)
-                              }}
-                              disabled={qrData[instance.name]?.loading}
-                            >
-                              {qrData[instance.name]?.loading ? (
-                                <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Gerando Código...</>
-                              ) : (
-                                <>Gerar Código de Pareamento</>
-                              )}
-                            </Button>
-                          </div>
-                          {/* Exibição do QR Code e Pairing Code */}
-                          {qrData[instance.name]?.error && (
-                            <div className="text-red-400 text-xs mb-2">{qrData[instance.name]?.error}</div>
-                          )}
-                          {qrData[instance.name]?.qrBase64 && (
-                            <div className="flex flex-col items-center mb-2">
-                              <img src={String(qrData[instance.name]?.qrBase64 || "")} alt="QR Code" className="w-48 h-48 bg-white rounded p-2" />
-                              <div className="text-xs text-blue-200 mt-1">Escaneie o QR Code acima com o WhatsApp</div>
-                            </div>
-                          )}
-                          {qrData[instance.name]?.pairingCode && (
-                            <div className="flex flex-col items-center mb-2">
-                              <div className="font-mono text-lg bg-white/10 border border-white/20 rounded px-3 py-2 text-blue-100">
-                                {qrData[instance.name]?.pairingCode}
-                              </div>
-                              <div className="text-xs text-blue-200 mt-1">Código de pareamento</div>
-                            </div>
-                          )}
-                        </div>
-                      )}
-
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-blue-200 mb-1">Token</label>
-                        <div className="flex items-center">
-                          <div className="relative flex-1">
-                            <Input
-                              value={showToken[instance.id] ? (instance.token ?? "") : "********************************"}
-                              readOnly
-                              className="pr-16 font-mono text-sm bg-white/10 border-white/20 text-white"
-                            />
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-blue-200 hover:text-white"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  toggleShowToken(instance.id)
-                                }}
-                              >
-                                {showToken[instance.id] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 text-blue-200 hover:text-white"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  copyToClipboard(instance.token, "Token copiado para a área de transferência")
-                                }}
-                              >
-                                <Copy className="h-3 w-3" />
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mb-4">
-                        <label className="block text-sm font-medium text-blue-200 mb-1">JID</label>
-                        <div className="flex items-center">
-                          <Input value={instance.ownerJid ?? ""} readOnly className="pr-8 font-mono text-sm bg-white/10 border-white/20 text-white" />
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 -ml-8 text-blue-200 hover:text-white"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              copyToClipboard(instance.ownerJid, "JID copiado para a área de transferência")
-                            }}
-                          >
-                            <Copy className="h-3 w-3" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="flex flex-wrap gap-2 mt-4">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-blue-500/10 text-blue-200 border-blue-500/30 hover:bg-blue-500/20"
-                          onClick={e => {
-                            e.stopPropagation()
-                            setExpandedInstance(instance.id)
-                            fetchQrData(instance.name)
-                          }}
-                        >
-                          <RotateCw className="h-3 w-3 mr-1" />
-                          Reiniciar
-                        </Button>
-
-                        {instance.connectionStatus === "connected" && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="bg-amber-500/10 text-amber-200 border-amber-500/30 hover:bg-amber-500/20"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleDisconnectInstance(instance.id)
-                            }}
-                          >
-                            <Power className="h-3 w-3 mr-1" />
-                            Desconectar
-                          </Button>
-                        )}
-
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-red-500/10 text-red-200 border-red-500/30 hover:bg-red-500/20"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            setInstanceToDelete(instance)
-                            setDeleteDialogOpen(true)
-                          }}
-                        >
-                          <Trash2 className="h-3 w-3 mr-1" />
-                          Excluir instância
-                        </Button>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {expandedInstance !== instance.id && (
-                    <div className="flex flex-wrap gap-2 mt-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-blue-500/10 text-blue-200 border-blue-500/30 hover:bg-blue-500/20"
-                        onClick={e => {
-                          e.stopPropagation()
-                          setExpandedInstance(instance.id)
-                          fetchQrData(instance.name)
-                        }}
-                      >
-                        <RotateCw className="h-3 w-3 mr-1" />
-                        Reiniciar
-                      </Button>
-
-                      {instance.connectionStatus === "connected" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="bg-amber-500/10 text-amber-200 border-amber-500/30 hover:bg-amber-500/20"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            handleDisconnectInstance(instance.id)
-                          }}
-                        >
-                          <Power className="h-3 w-3 mr-1" />
-                          Desconectar
-                        </Button>
-                      )}
-
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="bg-red-500/10 text-red-200 border-red-500/30 hover:bg-red-500/20"
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setInstanceToDelete(instance)
-                          setDeleteDialogOpen(true)
-                        }}
-                      >
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Excluir
-                      </Button>
-                    </div>
-                  )}
                 </CardContent>
               </Card>
             </motion.div>
@@ -783,6 +620,181 @@ export default function WhatsAppInstances() {
               )}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de configurações da instância */}
+      <Dialog open={!!modalInstance} onOpenChange={open => setModalInstance(open ? modalInstance : null)}>
+        <DialogContent className="sm:max-w-[90vw] md:max-w-[500px] max-h-[90vh] overflow-y-auto backdrop-blur-md bg-white/5 border-white/5 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white-100">Configurações da Instância</DialogTitle>
+            <DialogDescription className="text-white-200">
+              Detalhes e ações para a instância <span className="font-bold text-blue-300">{modalInstance?.name}</span>
+            </DialogDescription>
+          </DialogHeader>
+          {modalInstance && (
+            <>
+              {/* Estatísticas */}
+              <div className="grid grid-cols-3 gap-2 mb-4">
+                <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-md">
+                  <div className="flex items-center text-blue-200 mb-1">
+                    <Users className="h-4 w-4 mr-1" />
+                    <span className="text-xs">Contatos</span>
+                  </div>
+                  <span className="font-semibold text-blue-100">{modalInstance._count.Contact}</span>
+                </div>
+                <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-md">
+                  <div className="flex items-center text-blue-200 mb-1">
+                    <MessageSquare className="h-4 w-4 mr-1" />
+                    <span className="text-xs">Chats</span>
+                  </div>
+                  <span className="font-semibold text-blue-100">{modalInstance._count.Chat}</span>
+                </div>
+                <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-md">
+                  <div className="flex items-center text-blue-200 mb-1">
+                    <Mail className="h-4 w-4 mr-1" />
+                    <span className="text-xs">Mensagens</span>
+                  </div>
+                  <span className="font-semibold text-blue-100">{modalInstance._count.Message}</span>
+                </div>
+              </div>
+              {/* Token */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-blue-200 mb-1">Token</label>
+                <div className="flex items-center">
+                  <div className="relative flex-1">
+                    <Input
+                      value={showToken[modalInstance.id] ? (modalInstance.token ?? "") : "********************************"}
+                      readOnly
+                      className="pr-16 font-mono text-sm bg-white/10 border-white/20 text-white"
+                    />
+                    <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-blue-200 hover:text-white"
+                        onClick={() => toggleShowToken(modalInstance.id)}
+                      >
+                        {showToken[modalInstance.id] ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-6 w-6 text-blue-200 hover:text-white"
+                        onClick={() => copyToClipboard(modalInstance.token, "Token copiado para a área de transferência")}
+                      >
+                        <Copy className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* JID */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-blue-200 mb-1">JID</label>
+                <div className="flex items-center">
+                  <Input value={modalInstance.ownerJid ?? ""} readOnly className="pr-8 font-mono text-sm bg-white/10 border-white/20 text-white" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 -ml-8 text-blue-200 hover:text-white"
+                    onClick={() => copyToClipboard(modalInstance.ownerJid, "JID copiado para a área de transferência")}
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
+              </div>
+              {/* QR Code e Pairing Code */}
+              {modalInstance.connectionStatus !== "connected" && (
+                <div className="mb-6">
+                  <div className="mb-2 text-blue-200 text-sm">
+                    Para conectar, escaneie o QR Code com o WhatsApp
+                  </div>
+                  <div className="flex gap-2 mb-2 flex-wrap">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+                      onClick={() => handleStartQrPolling(modalInstance.name)}
+                      disabled={qrData[modalInstance.name]?.loading || modalInstance.connectionStatus === "connected"}
+                    >
+                      {qrData[modalInstance.name]?.loading ? (
+                        <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Gerando QR Code...</>
+                      ) : (
+                        <>Gerar QR Code</>
+                      )}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="bg-blue-500/10 text-blue-200 border-blue-500/30 hover:bg-blue-500/20"
+                      onClick={() => fetchQrData(modalInstance.name)}
+                      disabled={qrData[modalInstance.name]?.loading}
+                    >
+                      {qrData[modalInstance.name]?.loading ? (
+                        <><Loader2 className="h-3 w-3 mr-1 animate-spin" />Gerando Código...</>
+                      ) : (
+                        <>Gerar Código de Pareamento</>
+                      )}
+                    </Button>
+                  </div>
+                  {/* Exibição do QR Code e Pairing Code */}
+                  {qrData[modalInstance.name]?.error && (
+                    <div className="text-red-400 text-xs mb-2">{qrData[modalInstance.name]?.error}</div>
+                  )}
+                  {qrData[modalInstance.name]?.qrBase64 && (
+                    <div className="flex flex-col items-center mb-2">
+                      <img src={String(qrData[modalInstance.name]?.qrBase64 || "")} alt="QR Code" className="w-48 h-48 bg-white rounded p-2" />
+                      <div className="text-xs text-blue-200 mt-1">Escaneie o QR Code acima com o WhatsApp</div>
+                    </div>
+                  )}
+                  {qrData[modalInstance.name]?.pairingCode && (
+                    <div className="flex flex-col items-center mb-2">
+                      <div className="font-mono text-lg bg-white/10 border border-white/20 rounded px-3 py-2 text-blue-100">
+                        {qrData[modalInstance.name]?.pairingCode}
+                      </div>
+                      <div className="text-xs text-blue-200 mt-1">Código de pareamento</div>
+                    </div>
+                  )}
+                </div>
+              )}
+              {/* Botões de ação */}
+              <div className="flex flex-wrap gap-2 mt-4">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+                  onClick={() => fetchQrData(modalInstance.name)}
+                >
+                  <RotateCw className="h-3 w-3 mr-1" />
+                  Reiniciar
+                </Button>
+                {modalInstance.connectionStatus === "connected" && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-white"
+                    onClick={() => handleDisconnectInstance(modalInstance.id)}
+                  >
+                    <Power className="h-3 w-3 mr-1" />
+                    Desconectar
+                  </Button>
+                )}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
+                  onClick={() => {
+                    setInstanceToDelete(modalInstance)
+                    setDeleteDialogOpen(true)
+                  }}
+                >
+                  <Trash2 className="h-3 w-3 mr-1" />
+                  Excluir instância
+                </Button>
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
     </div>
