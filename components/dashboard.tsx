@@ -25,6 +25,7 @@ import SystemMessages from "@/components/system-messages";
 import TransferDestinations from "@/components/transfer-destinations";
 import MenusManager from "@/components/menus-manager";
 import FlowEditor from "@/components/flow-editor";
+import WhatsAppInstances from "@/components/whatsapp-instances";
 import Image from "next/image";
 
 export default function Dashboard() {
@@ -67,13 +68,15 @@ export default function Dashboard() {
         return <TransferDestinations />;
       case "menus":
         return <MenusManager />;
+      case "instances":
+        return <WhatsAppInstances />;
       default:
         return <div>Selecione uma opção no menu</div>;
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-[#0f172a] to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-600 to-slate-900">
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
@@ -101,7 +104,9 @@ export default function Dashboard() {
                       className="h-full w-full object-contain drop-shadow-md"
                     />
                   </div>
-                  <h1 className="text-xl font-bold text-white">Atendente Virtual</h1>
+                  <h1 className="text-xl font-bold text-white">
+                    Atendente Virtual
+                  </h1>
                 </motion.div>
                 <Button
                   variant="ghost"
@@ -116,7 +121,9 @@ export default function Dashboard() {
             </SidebarHeader>
             <SidebarContent>
               <SidebarGroup>
-                <SidebarGroupLabel className="text-blue-200 font-medium">Principal</SidebarGroupLabel>
+                <SidebarGroupLabel className="text-blue-200 font-medium">
+                  Principal
+                </SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
                     <SidebarMenuItem>
@@ -135,7 +142,9 @@ export default function Dashboard() {
                             />
                           </div>
                           <span>Fluxo de atendimento</span>
-                          {activeContent === "fluxo" && <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />}
+                          {activeContent === "fluxo" && (
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
+                          )}
                         </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -148,15 +157,24 @@ export default function Dashboard() {
                       >
                         <button>
                           <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
-                            <img src="/images/menu.png" alt="Menus" className="h-full w-full object-contain" />
+                            <img
+                              src="/images/menu.png"
+                              alt="Menus"
+                              className="h-full w-full object-contain"
+                            />
                           </div>
                           <span>Menus</span>
-                          {activeContent === "menus" && <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />}
+                          {activeContent === "menus" && (
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
+                          )}
                         </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                     <SidebarMenuItem>
-                      <SidebarMenuButton asChild className="text-white/80 hover:text-white hover:bg-white/10">
+                      <SidebarMenuButton
+                        asChild
+                        className="text-white/80 hover:text-white hover:bg-white/10"
+                      >
                         <button>
                           <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
                             <img
@@ -174,7 +192,9 @@ export default function Dashboard() {
               </SidebarGroup>
 
               <SidebarGroup>
-                <SidebarGroupLabel className="text-blue-200 font-medium">Comunicação</SidebarGroupLabel>
+                <SidebarGroupLabel className="text-blue-200 font-medium">
+                  Comunicação
+                </SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
                     <SidebarMenuItem>
@@ -186,7 +206,11 @@ export default function Dashboard() {
                       >
                         <button>
                           <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
-                            <img src="/images/balao.png" alt="Mensagens" className="h-full w-full object-contain" />
+                            <img
+                              src="/images/balao.png"
+                              alt="Mensagens"
+                              className="h-full w-full object-contain"
+                            />
                           </div>
                           <span>Mensagens</span>
                           <Badge
@@ -214,7 +238,31 @@ export default function Dashboard() {
                             />
                           </div>
                           <span>Destinos de transferência</span>
-                          {activeContent === "whatsapp" && <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />}
+                          {activeContent === "whatsapp" && (
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
+                          )}
+                        </button>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={activeContent === "instances"}
+                        onClick={() => changeContent("instances")}
+                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400"
+                      >
+                        <button>
+                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-green-100 to-green-200 p-1">
+                            <img
+                              src="/images/whatsapp.png"
+                              alt="Instâncias WhatsApp"
+                              className="h-full w-full object-contain"
+                            />
+                          </div>
+                          <span>Instâncias WhatsApp</span>
+                          {activeContent === "instances" && (
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-500" />
+                          )}
                         </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -229,8 +277,12 @@ export default function Dashboard() {
                     {username.charAt(0).toUpperCase()}
                   </div>
                   <div className="flex flex-col">
-                    <span className="text-sm font-medium text-white">{username}</span>
-                    <span className="text-xs text-blue-200">admin@edusystem.com</span>
+                    <span className="text-sm font-medium text-white">
+                      {username}
+                    </span>
+                    <span className="text-xs text-blue-200">
+                      admin@admin.com
+                    </span>
                   </div>
                 </div>
                 <Button
