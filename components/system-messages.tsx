@@ -153,7 +153,7 @@ export default function SystemMessages() {
             Mensagens do Atendente
           </h2>
           <p className="text-blue-200">
-            Configure as mensagens pré-definidas que o atendente virtual
+            Configure as mensagens pré-definidas que o Agente virtual
             utilizará.
           </p>
         </div>

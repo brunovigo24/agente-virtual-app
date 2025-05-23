@@ -88,7 +88,7 @@ export default function LoginPage() {
                 >
                   <Image
                     src="/images/robo.png"
-                    alt="Atendente Virtual"
+                    alt="Agente Virtual"
                     width={200}
                     height={200}
                     className="object-contain drop-shadow-2xl"
@@ -102,7 +102,7 @@ export default function LoginPage() {
               transition={{ delay: 0.4, duration: 0.5 }}
               className="mt-8 text-center"
             >
-              <h1 className="text-4xl font-bold text-white mb-2">Atendente Virtual</h1>
+              <h1 className="text-4xl font-bold text-white mb-2">Agente Virtual</h1>
               <p className="text-blue-200 max-w-md">
                 Plataforma inteligente para gerenciamento de atendimento automatizado
               </p>
@@ -121,7 +121,7 @@ export default function LoginPage() {
                 <div className="md:hidden w-20 h-20 mb-2">
                   <Image
                     src="/images/robo.png"
-                    alt="Atendente Virtual"
+                    alt="Agente Virtual"
                     width={80}
                     height={80}
                     className="object-contain drop-shadow-xl"
@@ -231,7 +231,7 @@ export default function LoginPage() {
             </Card>
 
             <div className="mt-6 text-center text-blue-200 text-sm">
-              <p>© 2025 Atendente Virtual. Todos os direitos reservados.</p>
+              <p>© 2025 Agente Virtual. Todos os direitos reservados.</p>
             </div>
           </motion.div>
         </div>

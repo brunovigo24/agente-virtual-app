@@ -98,14 +98,14 @@ export default function Dashboard() {
                   <div className="h-10 w-10 rounded-md overflow-hidden bg-gradient-to-br from-blue-600 to-blue-400 p-1 shadow-lg">
                     <Image
                       src="/images/robo.png"
-                      alt="Atendente Virtual"
+                      alt="Agente Virtual"
                       width={40}
                       height={40}
                       className="h-full w-full object-contain drop-shadow-md"
                     />
                   </div>
                   <h1 className="text-xl font-bold text-white">
-                    Atendente Virtual
+                    Agente Virtual
                   </h1>
                 </motion.div>
                 <Button
@@ -213,12 +213,6 @@ export default function Dashboard() {
                             />
                           </div>
                           <span>Mensagens</span>
-                          <Badge
-                            variant="destructive"
-                            className="ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white text-xs"
-                          >
-                            Beta
-                          </Badge>
                         </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -263,6 +257,12 @@ export default function Dashboard() {
                           {activeContent === "instances" && (
                             <ChevronRight className="ml-auto h-4 w-4 text-blue-500" />
                           )}
+                                                    <Badge
+                            variant="destructive"
+                            className="ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white text-xs"
+                          >
+                            Beta
+                          </Badge>
                         </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
