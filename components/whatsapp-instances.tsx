@@ -363,6 +363,7 @@ export default function WhatsAppInstances() {
       if (pollingIntervalRef.current[instanceName]) {
         clearInterval(pollingIntervalRef.current[instanceName]!)
         pollingIntervalRef.current[instanceName] = null
+        fetchInstances()
       }
     }
   }, [modalInstance, pollingActive, modalInstance?.connectionStatus])
@@ -452,9 +453,7 @@ export default function WhatsAppInstances() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <Card
-                className={`p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white overflow-hidden transition-all duration-300 ${
-                  instance.connectionStatus === "connected" ? "ring-2 ring-green-500" : "ring-2 ring-red-500"
-                }`}
+                className={`p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white overflow-hidden transition-all duration-300`}
               >
                 <CardHeader className="flex flex-row items-center justify-between p-0 pb-2 border-b border-white/10">
                   <CardTitle className="text-lg font-semibold text-blue-100">{instance.name}</CardTitle>
@@ -744,7 +743,7 @@ export default function WhatsAppInstances() {
                   )}
                   {qrData[modalInstance.name]?.qrBase64 && (
                     <div className="flex flex-col items-center mb-2">
-                      <img src={String(qrData[modalInstance.name]?.qrBase64 || "")} alt="QR Code" className="w-48 h-48 bg-white rounded p-2" />
+                      <img src={String(qrData[modalInstance.name]?.qrBase64 || "")} alt="QR Code" className="w-49 h-49 bg-white rounded p-1" />
                       <div className="text-xs text-blue-200 mt-1">Escaneie o QR Code acima com o WhatsApp</div>
                     </div>
                   )}
