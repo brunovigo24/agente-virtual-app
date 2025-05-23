@@ -432,7 +432,7 @@ export default function WhatsAppInstances() {
                       {instance.profilePicUrl ? (
                         <Image
                           src={instance.profilePicUrl || "/placeholder.svg"}
-                          alt={instance.profileName}
+                          alt={instance.profileName || `Foto de ${instance.name}` || "Foto do perfil"}
                           width={48}
                           height={48}
                           className="h-full w-full object-cover"
