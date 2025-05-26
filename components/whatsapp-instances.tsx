@@ -370,12 +370,7 @@ export default function WhatsAppInstances() {
 
   return (
     <div className="transfer-destinations bg-gradient-to-br from-slate-900/80 to-blue-900/60 min-h-screen p-4">
-      <motion.div
-        className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white">Instâncias WhatsApp</h2>
           <p className="text-blue-200">Gerencie suas instâncias de WhatsApp conectadas ao sistema.</p>
@@ -397,15 +392,10 @@ export default function WhatsAppInstances() {
             Instância
           </Button>
         </div>
-      </motion.div>
+      </div>
 
       {/* Filtros */}
-      <motion.div
-        className="mb-6 flex flex-col sm:flex-row gap-4"
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.1 }}
-      >
+      <div className="mb-6 flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1 ">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-200" />
           <Input
@@ -425,7 +415,7 @@ export default function WhatsAppInstances() {
             <SelectItem value="disconnected" className="text-blue-900">Desconectados</SelectItem>
           </SelectContent>
         </Select>
-      </motion.div>
+      </div>
 
       {/* Lista de instâncias */}
       {isLoading ? (

@@ -251,12 +251,7 @@ export default function TransferDestinations() {
 
   return (
     <div className="transfer-destinations bg-gradient-to-br from-slate-900/80 to-blue-900/60 min-h-screen p-4">
-      <motion.div
-        className="mb-6 flex items-center justify-between"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">Destinos de Transferência</h2>
           <p className="text-blue-200">
@@ -270,42 +265,49 @@ export default function TransferDestinations() {
         >
           Atualizar
         </Button>
-      </motion.div>
+      </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        {destinos.map((destino) => (
-          <Card key={destino.id} className="p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white">
-            <div className="flex items-start justify-between mb-2">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <h3 className="font-semibold text-lg text-blue-100">{destino.titulo}</h3>
-                  <Badge variant="outline" className="bg-blue-500/10 border-blue-500/30 text-blue-200">{destino.id}</Badge>
-                </div>
-                <div className="flex items-center text-blue-200 mb-1">
-                  <img
-                    src="/images/whatsapp.png"
-                    alt="WhatsApp"
-                    className="h-5 w-5 mr-2"
-                  />
-                  <span className="font-medium">{destino.numero}</span>
-                </div>
-                {destino.descricao && (
-                  <div className="text-sm text-blue-300">
-                    {destino.descricao}
+        {destinos.map((destino, index) => (
+          <motion.div
+            key={destino.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
+          >
+            <Card className="p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white">
+              <div className="flex items-start justify-between mb-2">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="font-semibold text-lg text-blue-100">{destino.titulo}</h3>
+                    <Badge variant="outline" className="bg-blue-500/10 border-blue-500/30 text-blue-200">{destino.id}</Badge>
                   </div>
-                )}
+                  <div className="flex items-center text-blue-200 mb-1">
+                    <img
+                      src="/images/whatsapp.png"
+                      alt="WhatsApp"
+                      className="h-5 w-5 mr-2"
+                    />
+                    <span className="font-medium">{destino.numero}</span>
+                  </div>
+                  {destino.descricao && (
+                    <div className="text-sm text-blue-300">
+                      {destino.descricao}
+                    </div>
+                  )}
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEdit(destino)}
+                  className="text-blue-200 hover:text-white hover:bg-white/10"
+                >
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleEdit(destino)}
-                className="text-blue-200 hover:text-white hover:bg-white/10"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Editar
-              </Button>
-            </div>
-          </Card>
+            </Card>
+          </motion.div>
         ))}
       </div>
 

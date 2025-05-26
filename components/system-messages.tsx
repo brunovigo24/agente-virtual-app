@@ -142,12 +142,7 @@ export default function SystemMessages() {
 
   return (
     <div className="system-messages bg-gradient-to-br from-slate-900/80 to-blue-900/60 min-h-screen p-4">
-      <motion.div
-        className="mb-6 flex items-center justify-between"
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">
             Mensagens do Atendente
@@ -164,40 +159,46 @@ export default function SystemMessages() {
         >
           Atualizar
         </Button>
-      </motion.div>
+      </div>
 
       <div className="grid gap-4">
-        {mensagens.map((mensagem) => (
-          <Card
+        {mensagens.map((mensagem, index) => (
+          <motion.div
             key={mensagem.id}
-            className="p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: index * 0.1 }}
           >
-            <div className="flex items-start justify-between mb-2">
-              <div className="flex items-center gap-2">
-                <h3 className="font-semibold text-lg text-blue-100">
-                  {mensagem.titulo}
-                </h3>
-                <Badge
-                  variant="outline"
-                  className="bg-blue-500/10 border-blue-500/30 text-blue-200"
+            <Card
+              className="p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white"
+            >
+              <div className="flex items-start justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-lg text-blue-100">
+                    {mensagem.titulo}
+                  </h3>
+                  <Badge
+                    variant="outline"
+                    className="bg-blue-500/10 border-blue-500/30 text-blue-200"
+                  >
+                    {mensagem.id}
+                  </Badge>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleEdit(mensagem)}
+                  className="text-blue-200 hover:text-white hover:bg-white/10"
                 >
-                  {mensagem.id}
-                </Badge>
+                  <Edit className="h-4 w-4 mr-2" />
+                  Editar
+                </Button>
               </div>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => handleEdit(mensagem)}
-                className="text-blue-200 hover:text-white hover:bg-white/10"
-              >
-                <Edit className="h-4 w-4 mr-2" />
-                Editar
-              </Button>
-            </div>
-            <div className="whitespace-pre-wrap bg-blue-900/20 p-3 rounded-md text-sm text-blue-100">
-              {mensagem.conteudo}
-            </div>
-          </Card>
+              <div className="whitespace-pre-wrap bg-blue-900/20 p-3 rounded-md text-sm text-blue-100">
+                {mensagem.conteudo}
+              </div>
+            </Card>
+          </motion.div>
         ))}
       </div>
 
