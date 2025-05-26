@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit, Save, Loader2, CheckCircle, AlertCircle } from "lucide-react";
+import { Edit, Save, Loader2, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -263,6 +263,7 @@ export default function TransferDestinations() {
           variant="outline"
           className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
         >
+        <RefreshCw className="h-4 w-4 mr-2" />
           Atualizar
         </Button>
       </div>

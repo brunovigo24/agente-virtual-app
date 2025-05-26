@@ -21,6 +21,7 @@ import {
   CheckCircle,
   AlertCircle,
   Plus,
+  RefreshCw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
@@ -201,6 +202,7 @@ export default function MenusManager() {
             variant="outline"
             className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
           >
+            <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
           <Button

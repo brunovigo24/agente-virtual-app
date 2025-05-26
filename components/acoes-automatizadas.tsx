@@ -187,8 +187,7 @@ export default function AcoesAutomatizadas() {
         </div>
         <Button
           onClick={handleCreate}
-          variant="outline"
-          className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white flex gap-2"
+          className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
         >
           <Plus className="h-4 w-4" /> Nova Ação
         </Button>
