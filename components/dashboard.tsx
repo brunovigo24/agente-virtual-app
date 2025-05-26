@@ -27,6 +27,7 @@ import MenusManager from "@/components/menus-manager";
 import FlowEditor from "@/components/flow-editor";
 import WhatsAppInstances from "@/components/whatsapp-instances";
 import Image from "next/image";
+import AcoesAutomatizadas from "@/components/acoes-automatizadas";
 
 export default function Dashboard() {
   const [activeContent, setActiveContent] = useState("fluxo");
@@ -70,6 +71,8 @@ export default function Dashboard() {
         return <MenusManager />;
       case "instances":
         return <WhatsAppInstances />;
+      case "acoes":
+        return <AcoesAutomatizadas />;
       default:
         return <div>Selecione uma opção no menu</div>;
     }
@@ -173,17 +176,22 @@ export default function Dashboard() {
                     <SidebarMenuItem>
                       <SidebarMenuButton
                         asChild
-                        className="text-white/80 hover:text-white hover:bg-white/10"
+                        isActive={activeContent === "acoes"}
+                        onClick={() => changeContent("acoes")}
+                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400"
                       >
                         <button>
                           <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
                             <img
                               src="/images/engrenagem.png"
-                              alt="Configuração"
+                              alt="Ações Automatizadas"
                               className="h-full w-full object-contain"
                             />
                           </div>
-                          <span>Configuração</span>
+                          <span>Ações</span>
+                          {activeContent === "acoes" && (
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
+                          )}
                         </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
