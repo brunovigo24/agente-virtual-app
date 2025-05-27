@@ -53,7 +53,15 @@ export default function LoginPage() {
       // Redirect to dashboard
       router.push("/dashboard")
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Ocorreu um erro ao fazer login")
+      let errorMessage = "Ocorreu um erro ao fazer login"
+      if (err instanceof Error) {
+        if (err.message === "Failed to fetch") {
+          errorMessage = "Não foi possível conectar na API"
+        } else {
+          errorMessage = err.message
+        }
+      }
+      setError(errorMessage)
     } finally {
       setIsLoading(false)
     }
