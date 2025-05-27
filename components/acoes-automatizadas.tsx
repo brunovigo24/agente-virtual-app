@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 // Tipo da ação automatizada
 export type Acao = {
@@ -233,12 +234,12 @@ export default function AcoesAutomatizadas() {
       </div>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="bg-slate-900 border-white/10">
+        <DialogContent className="sm:max-w-[90vw] md:max-w-[600px] max-h-[90vh] overflow-y-auto backdrop-blur-md bg-white/5 border-white/10 text-white">
           <DialogHeader>
-            <DialogTitle className="text-white">
+            <DialogTitle className="text-white-100">
               {isCreating ? "Nova Ação" : "Editar Ação"}
             </DialogTitle>
-            <DialogDescription className="text-blue-200">
+            <DialogDescription className="text-white-200">
               {isCreating
                 ? "Preencha os dados para criar uma nova ação."
                 : "Edite os dados da ação automatizada."}
@@ -285,15 +286,22 @@ export default function AcoesAutomatizadas() {
               <Label htmlFor="acao_tipo" className="text-blue-100">
                 Tipo de Ação
               </Label>
-              <Input
-                id="acao_tipo"
+              <Select
                 value={editingAcao?.acao_tipo || ""}
-                onChange={(e) =>
-                  setEditingAcao((prev) => prev && { ...prev, acao_tipo: e.target.value })
+                onValueChange={(value) =>
+                  setEditingAcao((prev) => prev && { ...prev, acao_tipo: value })
                 }
-                required
-                className="bg-slate-800 border-white/10 text-white"
-              />
+              >
+                <SelectTrigger className="bg-slate-800 border-white/10 text-white">
+                  <SelectValue placeholder="Selecione o tipo de ação" />
+                </SelectTrigger>
+                <SelectContent className="bg-slate-800 border-white/10 text-white">
+                  <SelectItem value="mensagem">Mensagem</SelectItem>
+                  <SelectItem value="link">Link</SelectItem>
+                  <SelectItem value="arquivo">Arquivo</SelectItem>
+                  {/*<SelectItem value="transferencia">Transferência</SelectItem>*/}
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Label htmlFor="conteudo" className="text-blue-100">
@@ -311,19 +319,35 @@ export default function AcoesAutomatizadas() {
             </div>
             <DialogFooter className="mt-2 flex gap-2">
               <Button
-                type="submit"
-                disabled={isSaving}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />} Salvar
-              </Button>
-              <Button
+                variant="outline"
                 type="button"
-                variant="ghost"
                 onClick={() => setIsDialogOpen(false)}
-                className="text-blue-200"
+                disabled={isSaving}
+                className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
               >
                 Cancelar
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSaving}
+                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Salvando...
+                  </>
+                ) : saveSuccess === true ? (
+                  <>
+                    <CheckCircle className="mr-2 h-4 w-4" />
+                    Salvo!
+                  </>
+                ) : (
+                  <>
+                    <Save className="mr-2 h-4 w-4" />
+                    Salvar
+                  </>
+                )}
               </Button>
             </DialogFooter>
             {saveSuccess === true && (
