@@ -41,6 +41,8 @@ export default function AcoesAutomatizadas() {
   const [isCreating, setIsCreating] = useState(false);
   const [arquivo, setArquivo] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [acaoParaDeletar, setAcaoParaDeletar] = useState<Acao | null>(null);
 
   // Função utilitária para requisições autenticadas
   function getAuthHeaders(): HeadersInit {
@@ -86,14 +88,19 @@ export default function AcoesAutomatizadas() {
   };
 
   const handleDelete = async (acao: Acao) => {
-    if (!window.confirm("Tem certeza que deseja deletar esta ação?")) return;
+    setAcaoParaDeletar(acao);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    if (!acaoParaDeletar) return;
     try {
-      const response = await fetch(`http://localhost:3000/api/acoes/${acao.id}`, {
+      const response = await fetch(`http://localhost:3000/api/acoes/${acaoParaDeletar.id}`, {
         method: "DELETE",
         headers: getAuthHeaders() as HeadersInit,
       });
       if (!response.ok) throw new Error("Erro ao deletar ação");
-      setAcoes(acoes.filter((a) => a.id !== acao.id));
+      setAcoes(acoes.filter((a) => a.id !== acaoParaDeletar.id));
       toast({
         title: "Ação deletada",
         description: `A ação foi removida com sucesso.`,
@@ -105,6 +112,9 @@ export default function AcoesAutomatizadas() {
         description: "Não foi possível deletar a ação.",
         open: true,
       });
+    } finally {
+      setIsDeleteDialogOpen(false);
+      setAcaoParaDeletar(null);
     }
   };
 
@@ -445,6 +455,35 @@ export default function AcoesAutomatizadas() {
               </div>
             )}
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de confirmação de deleção */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[400px] bg-white/5 border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white-100">Tem certeza que deseja deletar esta ação?</DialogTitle>
+            <DialogDescription className="text-white-200">
+              Esta ação não poderá ser desfeita. A ação será removida do sistema.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="mt-2 flex gap-2">
+            <Button
+              variant="outline"
+              type="button"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+            >
+              Cancelar
+            </Button>
+            <Button
+              type="button"
+              onClick={confirmDelete}
+              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
+            >
+              Deletar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
