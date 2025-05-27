@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -39,6 +39,8 @@ export default function AcoesAutomatizadas() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [arquivo, setArquivo] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Função utilitária para requisições autenticadas
   function getAuthHeaders(): HeadersInit {
@@ -72,6 +74,7 @@ export default function AcoesAutomatizadas() {
     setIsDialogOpen(true);
     setSaveSuccess(null);
     setIsCreating(false);
+    setArquivo(null);
   };
 
   const handleCreate = () => {
@@ -79,6 +82,7 @@ export default function AcoesAutomatizadas() {
     setIsDialogOpen(true);
     setSaveSuccess(null);
     setIsCreating(true);
+    setArquivo(null);
   };
 
   const handleDelete = async (acao: Acao) => {
@@ -110,28 +114,35 @@ export default function AcoesAutomatizadas() {
     setSaveSuccess(null);
     try {
       let response;
-      if (isCreating) {
-        response = await fetch("http://localhost:3000/api/acoes", {
-          method: "POST",
+      if ((isCreating && editingAcao.acao_tipo === "arquivo") || (!isCreating && editingAcao.acao_tipo === "arquivo" && arquivo)) {
+        const formData = new FormData();
+        if (isCreating) {
+          formData.append("etapa", editingAcao.etapa);
+        }
+        formData.append("opcao", editingAcao.opcao);
+        formData.append("acao_tipo", editingAcao.acao_tipo);
+        formData.append("conteudo", editingAcao.conteudo);
+        if (arquivo) formData.append("arquivo", arquivo);
+        response = await fetch(isCreating ? "http://localhost:3000/api/acoes" : `http://localhost:3000/api/acoes/${editingAcao.id}`, {
+          method: isCreating ? "POST" : "PUT",
+          headers: {
+            ...(getAuthHeaders() as HeadersInit),
+          },
+          body: formData,
+        });
+      } else {
+        response = await fetch(isCreating ? "http://localhost:3000/api/acoes" : `http://localhost:3000/api/acoes/${editingAcao.id}`, {
+          method: isCreating ? "POST" : "PUT",
           headers: {
             "Content-Type": "application/json",
             ...(getAuthHeaders() as HeadersInit),
           },
-          body: JSON.stringify({
+          body: JSON.stringify(isCreating ? {
             etapa: editingAcao.etapa,
             opcao: editingAcao.opcao,
             acao_tipo: editingAcao.acao_tipo,
             conteudo: editingAcao.conteudo,
-          }),
-        });
-      } else {
-        response = await fetch(`http://localhost:3000/api/acoes/${editingAcao.id}`, {
-          method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-            ...(getAuthHeaders() as HeadersInit),
-          },
-          body: JSON.stringify({
+          } : {
             opcao: editingAcao.opcao,
             acao_tipo: editingAcao.acao_tipo,
             conteudo: editingAcao.conteudo,
@@ -142,6 +153,7 @@ export default function AcoesAutomatizadas() {
       setSaveSuccess(true);
       setIsDialogOpen(false);
       setEditingAcao(null);
+      setArquivo(null);
       fetchAcoes();
       toast({
         title: isCreating ? "Ação criada" : "Ação atualizada",
@@ -159,6 +171,14 @@ export default function AcoesAutomatizadas() {
       setIsSaving(false);
     }
   };
+
+  // Utilitário para converter buffer para URL
+  function bufferToUrl(arquivo: any, arquivo_tipo: string) {
+    if (!arquivo || !arquivo.data || !arquivo_tipo) return null;
+    const byteArray = new Uint8Array(arquivo.data);
+    const blob = new Blob([byteArray], { type: arquivo_tipo });
+    return URL.createObjectURL(blob);
+  }
 
   if (isLoading) {
     return (
@@ -219,6 +239,49 @@ export default function AcoesAutomatizadas() {
                   </Badge>
                 </div>
                 <div className="text-white font-medium mt-1">{acao.conteudo}</div>
+                {/* Exibe arquivo se for do tipo arquivo */}
+                {acao.acao_tipo === "arquivo" && (acao as any).arquivo && (acao as any).arquivo_tipo && (
+                  <div className="mt-2">
+                    {(acao as any).arquivo_tipo.startsWith("image/") ? (
+                      (() => {
+                        const url = bufferToUrl((acao as any).arquivo, (acao as any).arquivo_tipo) || '';
+                        return url ? (
+                          <img
+                            src={url}
+                            alt={(acao as any).arquivo_nome || "Arquivo"}
+                            className="max-w-xs max-h-48 rounded border border-white/10"
+                          />
+                        ) : null;
+                      })()
+                    ) : (acao as any).arquivo_tipo.startsWith("video/") ? (
+                      (() => {
+                        const url = bufferToUrl((acao as any).arquivo, (acao as any).arquivo_tipo) || '';
+                        return url ? (
+                          <video
+                            src={url}
+                            controls
+                            className="max-w-xs max-h-48 rounded border border-white/10"
+                          />
+                        ) : null;
+                      })()
+                    ) : (
+                      (() => {
+                        const url = bufferToUrl((acao as any).arquivo, (acao as any).arquivo_tipo) || '';
+                        return url ? (
+                          <a
+                            href={url}
+                            download={(acao as any).arquivo_nome || undefined}
+                            className="text-blue-300 underline"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Baixar arquivo
+                          </a>
+                        ) : null;
+                      })()
+                    )}
+                  </div>
+                )}
               </div>
               <div className="flex gap-2 mt-2 md:mt-0">
                 <Button size="icon" variant="ghost" title="Editar" onClick={() => handleEdit(acao)}>
@@ -288,9 +351,10 @@ export default function AcoesAutomatizadas() {
               </Label>
               <Select
                 value={editingAcao?.acao_tipo || ""}
-                onValueChange={(value) =>
-                  setEditingAcao((prev) => prev && { ...prev, acao_tipo: value })
-                }
+                onValueChange={(value) => {
+                  setEditingAcao((prev) => prev && { ...prev, acao_tipo: value });
+                  if (value !== "arquivo") setArquivo(null);
+                }}
               >
                 <SelectTrigger className="bg-slate-800 border-white/10 text-white">
                   <SelectValue placeholder="Selecione o tipo de ação" />
@@ -317,6 +381,26 @@ export default function AcoesAutomatizadas() {
                 className="bg-slate-800 border-white/10 text-white"
               />
             </div>
+            {/* Campo de upload de arquivo */}
+            {editingAcao?.acao_tipo === "arquivo" && (
+              <div>
+                <Label htmlFor="arquivo" className="text-blue-100">Arquivo</Label>
+                <Input
+                  id="arquivo"
+                  type="file"
+                  accept="image/*,video/*"
+                  ref={fileInputRef}
+                  onChange={e => setArquivo(e.target.files?.[0] || null)}
+                  className="bg-slate-800 border-white/10 text-white"
+                />
+                {/* Exibe nome do arquivo selecionado */}
+                {arquivo && <div className="text-blue-200 text-xs mt-1">Selecionado: {arquivo.name}</div>}
+                {/* Exibe arquivo já salvo ao editar */}
+                {!arquivo && !isCreating && editingAcao && (editingAcao as any).arquivo_nome && (
+                  <div className="text-blue-200 text-xs mt-1">Atual: {(editingAcao as any).arquivo_nome}</div>
+                )}
+              </div>
+            )}
             <DialogFooter className="mt-2 flex gap-2">
               <Button
                 variant="outline"
