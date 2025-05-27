@@ -30,7 +30,7 @@ import Image from "next/image";
 import AcoesAutomatizadas from "@/components/acoes-automatizadas";
 
 export default function Dashboard() {
-  const [activeContent, setActiveContent] = useState("fluxo");
+  const [activeContent, setActiveContent] = useState("menus");
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [key, setKey] = useState(0);
   const [username, setUsername] = useState("Admin");
@@ -129,7 +129,7 @@ export default function Dashboard() {
                 </SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    <SidebarMenuItem>
+                    {/* <SidebarMenuItem>
                       <SidebarMenuButton
                         asChild
                         isActive={activeContent === "fluxo"}
@@ -150,7 +150,7 @@ export default function Dashboard() {
                           )}
                         </button>
                       </SidebarMenuButton>
-                    </SidebarMenuItem>
+                    </SidebarMenuItem> */}
                     <SidebarMenuItem>
                       <SidebarMenuButton
                         asChild
