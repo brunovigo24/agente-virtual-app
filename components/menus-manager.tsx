@@ -22,6 +22,7 @@ import {
   AlertCircle,
   Plus,
   RefreshCw,
+  Trash2,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
@@ -34,6 +35,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import {
+  AlertDialog,
+  AlertDialogTrigger,
+  AlertDialogContent,
+  AlertDialogHeader,
+  AlertDialogFooter,
+  AlertDialogTitle,
+  AlertDialogDescription,
+  AlertDialogAction,
+  AlertDialogCancel,
+} from "@/components/ui/alert-dialog";
 
 type MenuItem = {
   id: string;
@@ -363,19 +375,42 @@ export default function MenusManager() {
                       />
                     </div>
                     {index !== editingMenu.opcoes.length - 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => {
-                          const newOpcoes = [...editingMenu.opcoes];
-                          newOpcoes.splice(index, 1);
-                          setEditingMenu({ ...editingMenu, opcoes: newOpcoes });
-                        }}
-                        className="text-red-400 hover:text-red-300 hover:bg-white/10"
-                      >
-                        <AlertCircle className="h-4 w-4" />
-                      </Button>
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="text-red-400 hover:text-red-300 hover:bg-white/10"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="sm:max-w-[90vw] md:max-w-[600px] max-h-[90vh] overflow-y-auto backdrop-blur-md bg-white/5 border-white/10 text-white">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
+                            <AlertDialogDescription className="text-white-200">
+                              Tem certeza que deseja excluir a opção <span className="font-bold text-red-300">{opcao.titulo || 'Sem título'}</span>?<br />
+                              <span className="text-red-400 font-semibold">Esta ação não poderá ser desfeita.</span>
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <AlertDialogFooter>
+                            <AlertDialogCancel className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+                            >
+                              Cancelar</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => {
+                                const newOpcoes = [...editingMenu.opcoes];
+                                newOpcoes.splice(index, 1);
+                                setEditingMenu({ ...editingMenu, opcoes: newOpcoes });
+                              }}
+                              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
+                              >
+                              Excluir
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     )}
                   </div>
                 ))}
