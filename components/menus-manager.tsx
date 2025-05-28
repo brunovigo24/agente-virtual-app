@@ -23,6 +23,8 @@ import {
   Plus,
   RefreshCw,
   Trash2,
+  Search,
+  X,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
@@ -64,6 +66,7 @@ export default function MenusManager() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
   const [isCreating, setIsCreating] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   // Função utilitária para requisições autenticadas
   function getAuthHeaders() {
@@ -226,6 +229,26 @@ export default function MenusManager() {
           </Button>
         </div>
       </div>
+      <div className="mb-4 max-w-md relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-blue-200" />
+        <Input
+          type="text"
+          placeholder="Pesquisar por nome ou ID..."
+          value={searchTerm}
+          onChange={e => setSearchTerm(e.target.value)}
+          className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+        />
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={() => setSearchTerm("")}
+            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 text-blue-200 hover:text-white focus:outline-none"
+            aria-label="Limpar pesquisa"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
 
       <Card className="shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white">
         <CardHeader>
@@ -243,37 +266,46 @@ export default function MenusManager() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {menus.map((menu) => (
-                <TableRow
-                  key={menu.id}
-                  className="hover:bg-blue-900/20 transition-colors"
-                >
-                  <TableCell className="font-medium text-blue-100">
-                    {menu.titulo}
-                  </TableCell>
-                  <TableCell>
-                    <Badge
-                      variant="outline"
-                      className="bg-blue-500/10 border-blue-500/30 text-blue-200"
-                    >
-                      {menu.id}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex justify-end gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(menu)}
-                        className="text-blue-200 hover:text-white hover:bg-white/10"
+              {menus
+                .filter((menu) => {
+                  const term = searchTerm.trim().toLowerCase();
+                  if (!term) return true;
+                  return (
+                    menu.titulo.toLowerCase().includes(term) ||
+                    menu.id.toLowerCase().includes(term)
+                  );
+                })
+                .map((menu) => (
+                  <TableRow
+                    key={menu.id}
+                    className="hover:bg-blue-900/20 transition-colors"
+                  >
+                    <TableCell className="font-medium text-blue-100">
+                      {menu.titulo}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className="bg-blue-500/10 border-blue-500/30 text-blue-200"
                       >
-                        <Edit className="h-4 w-4 mr-1" />
-                        Editar
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
+                        {menu.id}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(menu)}
+                          className="text-blue-200 hover:text-white hover:bg-white/10"
+                        >
+                          <Edit className="h-4 w-4 mr-1" />
+                          Editar
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
             </TableBody>
           </Table>
         </CardContent>

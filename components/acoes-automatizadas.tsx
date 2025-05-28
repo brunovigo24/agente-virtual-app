@@ -30,6 +30,14 @@ export type Acao = {
   conteudo: string;
 };
 
+type MenuItem = {
+  id: string;
+  titulo: string;
+  descricao: string;
+  opcoes: Array<{ id: string; titulo: string }>;
+  ativo?: boolean;
+};
+
 export default function AcoesAutomatizadas() {
   const [acoes, setAcoes] = useState<Acao[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -43,6 +51,9 @@ export default function AcoesAutomatizadas() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [acaoParaDeletar, setAcaoParaDeletar] = useState<Acao | null>(null);
+  const [menus, setMenus] = useState<MenuItem[]>([]);
+  const [isMenusLoading, setIsMenusLoading] = useState(false);
+  const [menusError, setMenusError] = useState<string | null>(null);
 
   // Função utilitária para requisições autenticadas
   function getAuthHeaders(): HeadersInit {
@@ -71,6 +82,28 @@ export default function AcoesAutomatizadas() {
     }
   };
 
+  // Buscar menus ao abrir modal de criação
+  const fetchMenus = async () => {
+    setIsMenusLoading(true);
+    setMenusError(null);
+    try {
+      const response = await fetch("http://localhost:3000/api/menus", {
+        headers: getAuthHeaders() as HeadersInit,
+      });
+      if (!response.ok) throw new Error("Erro ao buscar menus");
+      const data = await response.json();
+
+      const menusArray = Object.entries(data).map(
+        ([id, menu]: [string, any]) => ({ id, ...menu })
+      );
+      setMenus(menusArray);
+    } catch (err) {
+      setMenusError("Não foi possível carregar os menus.");
+    } finally {
+      setIsMenusLoading(false);
+    }
+  };
+
   const handleEdit = (acao: Acao) => {
     setEditingAcao(acao);
     setIsDialogOpen(true);
@@ -85,6 +118,7 @@ export default function AcoesAutomatizadas() {
     setSaveSuccess(null);
     setIsCreating(true);
     setArquivo(null);
+    fetchMenus(); 
   };
 
   const handleDelete = async (acao: Acao) => {
@@ -325,36 +359,85 @@ export default function AcoesAutomatizadas() {
             }}
             className="flex flex-col gap-4 mt-4"
           >
-            {isCreating && (
-              <div>
-                <Label htmlFor="etapa" className="text-blue-100">
-                  Etapa
-                </Label>
-                <Input
-                  id="etapa"
-                  value={editingAcao?.etapa || ""}
-                  onChange={(e) =>
-                    setEditingAcao((prev) => prev && { ...prev, etapa: e.target.value })
-                  }
-                  required
-                  className="bg-slate-800 border-white/10 text-white"
-                />
-              </div>
+            {/* Se for criação, mostrar selects de etapa e opção */}
+            {isCreating ? (
+              <>
+                <div>
+                  <Label htmlFor="etapa" className="text-blue-100">
+                    Etapa
+                  </Label>
+                  <Select
+                    value={editingAcao?.etapa || ""}
+                    onValueChange={(value) => {
+                      setEditingAcao((prev) => prev && { ...prev, etapa: value, opcao: "" });
+                    }}
+                  >
+                    <SelectTrigger className="bg-slate-800 border-white/10 text-white">
+                      <SelectValue placeholder={isMenusLoading ? "Carregando..." : "Selecione o menu"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-white/10 text-white">
+                      {menus.map((menu) => (
+                        <SelectItem key={menu.id} value={menu.id}>{menu.id}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {menusError && <div className="text-red-400 text-xs mt-1">{menusError}</div>}
+                </div>
+                <div>
+                  <Label htmlFor="opcao" className="text-blue-100">
+                    Opção
+                  </Label>
+                  <Select
+                    value={editingAcao?.opcao || ""}
+                    onValueChange={(value) => {
+                      setEditingAcao((prev) => prev && { ...prev, opcao: value });
+                    }}
+                    disabled={!editingAcao?.etapa}
+                  >
+                    <SelectTrigger className="bg-slate-800 border-white/10 text-white">
+                      <SelectValue placeholder={editingAcao?.etapa ? "Selecione a opção" : "Selecione a etapa primeiro"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-slate-800 border-white/10 text-white">
+                      {menus.find((m) => m.id === editingAcao?.etapa)?.opcoes.map((op) => (
+                        <SelectItem key={op.id} value={op.id}>{op.titulo || op.id}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </>
+            ) : (
+              <>
+                <div>
+                  <Label htmlFor="etapa" className="text-blue-100">
+                    Etapa
+                  </Label>
+                  <Input
+                    id="etapa"
+                    value={editingAcao?.etapa || ""}
+                    onChange={(e) =>
+                      setEditingAcao((prev) => prev && { ...prev, etapa: e.target.value })
+                    }
+                    required
+                    className="bg-slate-800 border-white/10 text-white"
+                    disabled={!isCreating}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="opcao" className="text-blue-100">
+                    Opção
+                  </Label>
+                  <Input
+                    id="opcao"
+                    value={editingAcao?.opcao || ""}
+                    onChange={(e) =>
+                      setEditingAcao((prev) => prev && { ...prev, opcao: e.target.value })
+                    }
+                    required
+                    className="bg-slate-800 border-white/10 text-white"
+                  />
+                </div>
+              </>
             )}
-            <div>
-              <Label htmlFor="opcao" className="text-blue-100">
-                Opção
-              </Label>
-              <Input
-                id="opcao"
-                value={editingAcao?.opcao || ""}
-                onChange={(e) =>
-                  setEditingAcao((prev) => prev && { ...prev, opcao: e.target.value })
-                }
-                required
-                className="bg-slate-800 border-white/10 text-white"
-              />
-            </div>
             <div>
               <Label htmlFor="acao_tipo" className="text-blue-100">
                 Tipo de Ação
