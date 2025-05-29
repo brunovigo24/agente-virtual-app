@@ -184,11 +184,11 @@ export default function Dashboard() {
                           <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
                             <img
                               src="/images/engrenagem.png"
-                              alt="Ações Automatizadas"
+                              alt="Ações Personalizadas"
                               className="h-full w-full object-contain"
                             />
                           </div>
-                          <span>Ações</span>
+                          <span>Ações personalizadas</span>
                           {activeContent === "acoes" && (
                             <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
                           )}

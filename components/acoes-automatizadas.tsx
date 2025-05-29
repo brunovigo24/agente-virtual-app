@@ -129,12 +129,53 @@ export default function AcoesAutomatizadas() {
   const confirmDelete = async () => {
     if (!acaoParaDeletar) return;
     try {
+      // 1. Deletar a ação
       const response = await fetch(`http://localhost:3000/api/acoes/${acaoParaDeletar.id}`, {
         method: "DELETE",
         headers: getAuthHeaders() as HeadersInit,
       });
       if (!response.ok) throw new Error("Erro ao deletar ação");
-      setAcoes(acoes.filter((a) => a.id !== acaoParaDeletar.id));
+
+      // 2. Buscar o fluxo atual para mapear a opção
+      const fluxoResponse = await fetch("http://localhost:3000/api/fluxo", {
+        headers: getAuthHeaders() as HeadersInit,
+      });
+      if (!fluxoResponse.ok) throw new Error("Erro ao buscar o fluxo atual");
+      const fluxoAtual = await fluxoResponse.json();
+
+      // 3. Mapear a opção para o seu valor no fluxo
+      const etapaNoFluxo = fluxoAtual[acaoParaDeletar.etapa];
+      if (etapaNoFluxo) {
+        const opcaoMapeada = etapaNoFluxo[acaoParaDeletar.opcao];
+        if (opcaoMapeada) {
+          // 4. Remover a opção mapeada do fluxo
+          const etapasAtualizadas = (fluxoAtual.etapasAjudoEmMaisInformacoes || []).filter(
+            (etapa: string) => etapa !== opcaoMapeada
+          );
+
+          // 5. Enviar o array atualizado
+          const fluxoUpdateResponse = await fetch(
+            "http://localhost:3000/api/fluxo/etapasAjudoEmMaisInformacoes",
+            {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                ...(getAuthHeaders() as HeadersInit),
+              },
+              body: JSON.stringify(etapasAtualizadas),
+            }
+          );
+          if (!fluxoUpdateResponse.ok) throw new Error("Erro ao atualizar o fluxo");
+        }
+      }
+
+      // 6. Atualizar a lista de ações
+      const acoesResponse = await fetch("http://localhost:3000/api/acoes", {
+        headers: getAuthHeaders() as HeadersInit,
+      });
+      if (!acoesResponse.ok) throw new Error("Erro ao buscar ações");
+      const acoes = await acoesResponse.json();
+      setAcoes(acoes.filter((a: Acao) => a.id !== acaoParaDeletar.id));
       toast({
         title: "Ação deletada",
         description: `A ação foi removida com sucesso.`,
@@ -197,29 +238,42 @@ export default function AcoesAutomatizadas() {
       
       // Atualizar o fluxo se for uma nova ação
       if (isCreating) {
-        // 1. Buscar o array atual de etapasAjudoEmMaisInformacoes
-        const fluxoAtualResponse = await fetch("http://localhost:3000/api/fluxo", {
+        // 1. Buscar o menu correspondente à etapa para mapear a opção
+        const menuSelecionado = menus.find((menu) => menu.id === editingAcao.etapa);
+        if (!menuSelecionado) throw new Error("Menu não encontrado");
+
+        // 2. Mapear a opção selecionada para o seu valor no fluxo (ex: "1" → "matriculas_infantil")
+        const fluxoResponse = await fetch("http://localhost:3000/api/fluxo", {
           headers: getAuthHeaders() as HeadersInit,
         });
-        if (!fluxoAtualResponse.ok) throw new Error("Erro ao buscar o fluxo atual");
-        const fluxoAtual = await fluxoAtualResponse.json();
+        if (!fluxoResponse.ok) throw new Error("Erro ao buscar o fluxo atual");
+        const fluxoAtual = await fluxoResponse.json();
 
-        // 2. Adicionar a nova etapa ao array existente (evitando duplicatas)
+        const etapaNoFluxo = fluxoAtual[editingAcao.etapa];
+        if (!etapaNoFluxo) throw new Error("Etapa não encontrada no fluxo");
+
+        const opcaoMapeada = etapaNoFluxo[editingAcao.opcao];
+        if (!opcaoMapeada) throw new Error("Opção não encontrada no fluxo");
+
+        // 3. Adicionar a opção mapeada (evitando duplicatas)
         const etapasAtualizadas = [
           ...(fluxoAtual.etapasAjudoEmMaisInformacoes || []),
-          editingAcao.etapa,
-        ].filter((etapa, index, self) => self.indexOf(etapa) === index); 
+          opcaoMapeada,
+        ].filter((etapa, index, self) => self.indexOf(etapa) === index);
 
-        // 3. Enviar o array atualizado
-        const fluxoResponse = await fetch("http://localhost:3000/api/fluxo/etapasAjudoEmMaisInformacoes", {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-            ...(getAuthHeaders() as HeadersInit),
-          },
-          body: JSON.stringify(etapasAtualizadas),
-        });
-        if (!fluxoResponse.ok) throw new Error("Erro ao atualizar o fluxo");
+        // 4. Enviar o array atualizado
+        const fluxoUpdateResponse = await fetch(
+          "http://localhost:3000/api/fluxo/etapasAjudoEmMaisInformacoes",
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              ...(getAuthHeaders() as HeadersInit),
+            },
+            body: JSON.stringify(etapasAtualizadas),
+          }
+        );
+        if (!fluxoUpdateResponse.ok) throw new Error("Erro ao atualizar o fluxo");
       }
       
       setSaveSuccess(true);
@@ -272,11 +326,11 @@ export default function AcoesAutomatizadas() {
   }
 
   return (
-    <div className="acoes-automatizadas bg-gradient-to-br from-slate-900/80 to-blue-900/60 min-h-screen p-4">
+    <div className="acoes-personalizadas bg-gradient-to-br from-slate-900/80 to-blue-900/60 min-h-screen p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-white">Ações Automatizadas</h2>
-          <p className="text-blue-200">Gerencie as ações automatizadas do sistema.</p>
+          <h2 className="text-2xl font-bold text-white">Ações personalizadas</h2>
+          <p className="text-blue-200">Gerencie as ações personalizadas do sistema.</p>
         </div>
         <Button
           onClick={handleCreate}
