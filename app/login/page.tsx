@@ -195,9 +195,9 @@ export default function LoginPage() {
                         Lembrar-me
                       </Label>
                     </div>
-                    <a href="#" className="text-sm text-blue-300 hover:text-blue-200 transition-colors">
+                    {/* <a href="#" className="text-sm text-blue-300 hover:text-blue-200 transition-colors">
                       Esqueceu a senha?
-                    </a>
+                    </a> */}
                   </div>
                 </CardContent>
                 <CardFooter>

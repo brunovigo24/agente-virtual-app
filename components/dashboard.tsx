@@ -173,28 +173,6 @@ export default function Dashboard() {
                         </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
-                    <SidebarMenuItem>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={activeContent === "acoes"}
-                        onClick={() => changeContent("acoes")}
-                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400"
-                      >
-                        <button>
-                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
-                            <img
-                              src="/images/engrenagem.png"
-                              alt="Ações Personalizadas"
-                              className="h-full w-full object-contain"
-                            />
-                          </div>
-                          <span>Ações personalizadas</span>
-                          {activeContent === "acoes" && (
-                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
-                          )}
-                        </button>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
                   </SidebarMenu>
                 </SidebarGroupContent>
               </SidebarGroup>
@@ -221,6 +199,31 @@ export default function Dashboard() {
                             />
                           </div>
                           <span>Mensagens</span>
+                          {activeContent === "mensagens" && (
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
+                          )}
+                        </button>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                    <SidebarMenuItem>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={activeContent === "acoes"}
+                        onClick={() => changeContent("acoes")}
+                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400"
+                      >
+                        <button>
+                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
+                            <img
+                              src="/images/engrenagem.png"
+                              alt="Ações Personalizadas"
+                              className="h-full w-full object-contain"
+                            />
+                          </div>
+                          <span>Ações personalizadas</span>
+                          {activeContent === "acoes" && (
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
+                          )}
                         </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
