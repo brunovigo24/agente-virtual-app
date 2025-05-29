@@ -194,6 +194,34 @@ export default function AcoesAutomatizadas() {
         });
       }
       if (!response.ok) throw new Error("Erro ao salvar ação");
+      
+      // Atualizar o fluxo se for uma nova ação
+      if (isCreating) {
+        // 1. Buscar o array atual de etapasAjudoEmMaisInformacoes
+        const fluxoAtualResponse = await fetch("http://localhost:3000/api/fluxo", {
+          headers: getAuthHeaders() as HeadersInit,
+        });
+        if (!fluxoAtualResponse.ok) throw new Error("Erro ao buscar o fluxo atual");
+        const fluxoAtual = await fluxoAtualResponse.json();
+
+        // 2. Adicionar a nova etapa ao array existente (evitando duplicatas)
+        const etapasAtualizadas = [
+          ...(fluxoAtual.etapasAjudoEmMaisInformacoes || []),
+          editingAcao.etapa,
+        ].filter((etapa, index, self) => self.indexOf(etapa) === index); 
+
+        // 3. Enviar o array atualizado
+        const fluxoResponse = await fetch("http://localhost:3000/api/fluxo/etapasAjudoEmMaisInformacoes", {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            ...(getAuthHeaders() as HeadersInit),
+          },
+          body: JSON.stringify(etapasAtualizadas),
+        });
+        if (!fluxoResponse.ok) throw new Error("Erro ao atualizar o fluxo");
+      }
+      
       setSaveSuccess(true);
       setIsDialogOpen(false);
       setEditingAcao(null);
@@ -269,7 +297,7 @@ export default function AcoesAutomatizadas() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.05 }}
           >
-            <Card className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 bg-white/5 border-white/10">
+            <Card className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10">
               <div className="flex-1 flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-blue-500/20 text-blue-200 text-xs">

@@ -274,7 +274,7 @@ export default function TransferDestinations() {
             key={destino.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: index * 0.1 }}
+            transition={{ duration: 0.2, delay: index * 0.1 }}
           >
             <Card className="p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white">
               <div className="flex items-start justify-between mb-2">
