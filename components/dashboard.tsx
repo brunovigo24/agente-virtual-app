@@ -225,9 +225,9 @@ export default function Dashboard() {
                         className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400"
                       >
                         <button>
-                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-green-100 to-green-200 p-1">
+                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
                             <img
-                              src="/images/whatsapp.png"
+                              src="/images/quebra-cabeca.png"
                               alt="Instâncias WhatsApp"
                               className="h-full w-full object-contain"
                             />
