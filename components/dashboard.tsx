@@ -24,10 +24,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import SystemMessages from "@/components/system-messages";
 import TransferDestinations from "@/components/transfer-destinations";
 import MenusManager from "@/components/menus-manager";
-import FlowEditor from "@/components/flow-editor";
 import WhatsAppInstances from "@/components/whatsapp-instances";
 import Image from "next/image";
-import AcoesAutomatizadas from "@/components/acoes-automatizadas";
+import AcoesAutomatizadas from "@/components/custom-actions";
 
 export default function Dashboard() {
   const [activeContent, setActiveContent] = useState("menus");
@@ -61,8 +60,6 @@ export default function Dashboard() {
 
   const renderContent = () => {
     switch (activeContent) {
-      case "fluxo":
-        return <FlowEditor />;
       case "mensagens":
         return <SystemMessages />;
       case "whatsapp":
@@ -122,28 +119,6 @@ export default function Dashboard() {
                 </SidebarGroupLabel>
                 <SidebarGroupContent>
                   <SidebarMenu>
-                    {/* <SidebarMenuItem>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={activeContent === "fluxo"}
-                        onClick={() => changeContent("fluxo")}
-                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400"
-                      >
-                        <button>
-                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
-                            <img
-                              src="/images/quebra-cabeca.png"
-                              alt="Fluxo de atendimento"
-                              className="h-full w-full object-contain"
-                            />
-                          </div>
-                          <span>Fluxo de atendimento</span>
-                          {activeContent === "fluxo" && (
-                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
-                          )}
-                        </button>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem> */}
                     <SidebarMenuItem>
                       <SidebarMenuButton
                         asChild
