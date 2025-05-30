@@ -79,7 +79,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-blue-900">
+    <div className="min-h-screen bg-blue-950">
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
