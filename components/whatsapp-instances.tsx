@@ -19,6 +19,7 @@ import {
   MessageSquare,
   Mail,
   Loader2,
+  AlertCircle,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { toast } from "@/components/ui/use-toast"
@@ -26,6 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { motion } from "framer-motion"
 import Image from "next/image"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 
 // Tipos
 type WhatsAppInstance = {
@@ -69,6 +71,7 @@ export default function WhatsAppInstances() {
   const [modalInstance, setModalInstance] = useState<WhatsAppInstance | null>(null)
   const [pollingActive, setPollingActive] = useState<Record<string, boolean>>({})
   const pollingIntervalRef = useRef<Record<string, NodeJS.Timeout | null>>({})
+  const [error, setError] = useState<string | null>(null)
 
   // Carregar instâncias
   useEffect(() => {
@@ -114,6 +117,7 @@ export default function WhatsAppInstances() {
         description: "Não foi possível carregar as instâncias do WhatsApp.",
         open: true,
       })
+      setError("Não foi possível carregar as instâncias do WhatsApp.")
     } finally {
       setIsLoading(false)
     }
@@ -401,6 +405,16 @@ export default function WhatsAppInstances() {
       }
     }
   }, [modalInstance, pollingActive, modalInstance?.connectionStatus])
+
+  if (error) {
+    return (
+      <Alert variant="destructive" className="bg-red-500/20 border border-red-500/50 text-red-200">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Erro</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="p-2">
