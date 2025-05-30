@@ -139,6 +139,40 @@ export default function WhatsAppInstances() {
     setFilteredInstances(filtered)
   }
 
+  // Função para formatar o número de telefone
+  const formatPhoneNumber = (value: string) => {
+    let digits = value.replace(/\D/g, "");
+    digits = digits.slice(0, 13);
+
+    // Monta o formato +55 (44) 99999-9999
+    let formatted = "";
+    if (digits.length > 0) {
+      formatted += "+" + digits.slice(0, 2);
+    }
+    if (digits.length > 2) {
+      formatted += " (" + digits.slice(2, 4) + ")";
+    }
+    if (digits.length > 4) {
+      formatted += " " + digits.slice(4, 9);
+    }
+    if (digits.length > 9) {
+      formatted += "-" + digits.slice(9, 13);
+    }
+    return formatted;
+  };
+
+  // Função para extrair apenas os dígitos do número formatado
+  const getOnlyDigits = (value: string) => {
+    return value.replace(/\D/g, "");
+  };
+
+  // Função para validar se o número tem código de país e DDD
+  const isValidPhoneNumber = (value: string) => {
+    const digits = getOnlyDigits(value);
+    // Deve ter 13 dígitos: 2 (país) + 2 (DDD) + 9 (número)
+    return digits.length === 13;
+  };
+
   const handleCreateInstance = async () => {
     setIsCreating(true)
     try {
@@ -147,7 +181,7 @@ export default function WhatsAppInstances() {
         headers: getAuthHeaders(),
         body: JSON.stringify({
           nome: newInstanceName,
-          numero: newInstanceNumber,
+          numero: getOnlyDigits(newInstanceNumber),
         }),
       })
       const responseBody = await response.text()
@@ -580,9 +614,10 @@ export default function WhatsAppInstances() {
               className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
             />
             <Input
-              placeholder="Número (ex: 5544988880000)"
+              placeholder="Número (ex: +55 (44) 99999-9999)"
               value={newInstanceNumber}
-              onChange={e => setNewInstanceNumber(e.target.value)}
+              onChange={e => setNewInstanceNumber(formatPhoneNumber(e.target.value))}
+              inputMode="numeric"
               className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
             />
           </div>
@@ -597,7 +632,7 @@ export default function WhatsAppInstances() {
             <Button
               onClick={handleCreateInstance}
               className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
-              disabled={!newInstanceName || !newInstanceNumber || isCreating}
+              disabled={!newInstanceName || !isValidPhoneNumber(newInstanceNumber) || isCreating}
             >
               {isCreating ? (
                 <>
