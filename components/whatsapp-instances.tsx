@@ -614,13 +614,16 @@ export default function WhatsAppInstances() {
               className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
             />
             <Input
-              placeholder="Número (ex: +55 (44) 99999-9999)"
+              placeholder="Número (ex: +55 (44) 00000-0000)"
               value={newInstanceNumber}
               onChange={e => setNewInstanceNumber(formatPhoneNumber(e.target.value))}
               inputMode="numeric"
               className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
-            />
+            />                <p className="text-xs text-white-300">
+            Formato permitido: +55 (44) 00000-0000
+          </p>             
           </div>
+
           <DialogFooter>
             <Button
               variant="outline"
@@ -736,7 +739,6 @@ export default function WhatsAppInstances() {
                   </div>
                   <div className="flex gap-2 mb-2 flex-wrap">
                     <Button
-                      variant="outline"
                       size="sm"
                       className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
                       onClick={() => handleStartQrPolling(modalInstance.name)}
@@ -749,9 +751,8 @@ export default function WhatsAppInstances() {
                       )}
                     </Button>
                     <Button
-                      variant="outline"
                       size="sm"
-                      className="bg-blue-500/10 text-blue-200 border-blue-500/30 hover:bg-blue-500/20"
+                      className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
                       onClick={() => fetchQrData(modalInstance.name)}
                       disabled={qrData[modalInstance.name]?.loading}
                     >

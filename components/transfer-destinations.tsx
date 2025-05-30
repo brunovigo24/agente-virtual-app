@@ -480,7 +480,7 @@ export default function TransferDestinations() {
                   />
                 </div>
                 <p className="text-xs text-white-300">
-                  Formato recomendado: +55 (44) 00000-0000
+                  Formato permitido: +55 (44) 00000-0000
                 </p>
               </div>
             </div>
