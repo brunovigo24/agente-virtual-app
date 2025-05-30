@@ -403,7 +403,7 @@ export default function WhatsAppInstances() {
   }, [modalInstance, pollingActive, modalInstance?.connectionStatus])
 
   return (
-    <div className="transfer-destinations bg-gradient-to-br from-slate-900/80 to-blue-900/60 min-h-screen p-4">
+    <div className="p-2">
       <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-white">Instâncias WhatsApp</h2>

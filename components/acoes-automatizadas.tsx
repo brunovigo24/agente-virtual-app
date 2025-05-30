@@ -308,7 +308,7 @@ export default function AcoesAutomatizadas() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64 bg-gradient-to-br from-slate-900/80 to-blue-900/60">
+      <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
         <span className="ml-2 text-blue-100">Carregando ações...</span>
       </div>
@@ -326,7 +326,7 @@ export default function AcoesAutomatizadas() {
   }
 
   return (
-    <div className="acoes-personalizadas bg-gradient-to-br from-slate-900/80 to-blue-900/60 min-h-screen p-4">
+    <div className="p-4">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-white">Ações personalizadas</h2>

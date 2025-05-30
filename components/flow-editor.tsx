@@ -379,7 +379,7 @@ export default function FlowEditor() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64 bg-gradient-to-br from-slate-900/80 to-blue-900/60">
+      <div className="flex items-center justify-center h-64">
         <Loader2 className="h-8 w-8 animate-spin text-blue-400" />
         <span className="ml-2 text-blue-100">Carregando menus...</span>
       </div>

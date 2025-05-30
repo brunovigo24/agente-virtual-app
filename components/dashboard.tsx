@@ -79,7 +79,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-600 to-blue-600 to-slate-900">
+    <div className="min-h-screen bg-blue-900">
       {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
@@ -92,12 +92,6 @@ export default function Dashboard() {
           <Sidebar className="backdrop-blur-sm bg-black/30 border-r border-white/10">
             <SidebarHeader className="flex flex-col gap-2 p-4">
               <div className="flex items-center justify-between">
-                <motion.div
-                  className="flex items-center gap-2"
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.5 }}
-                >
                   <div className="h-10 w-10 rounded-md overflow-hidden bg-gradient-to-br from-blue-600 to-blue-400 p-1 shadow-lg">
                     <Image
                       src="/images/robo.png"
@@ -110,7 +104,6 @@ export default function Dashboard() {
                   <h1 className="text-xl font-bold text-white">
                     Agente Virtual
                   </h1>
-                </motion.div>
                 <Button
                   variant="ghost"
                   size="icon"
