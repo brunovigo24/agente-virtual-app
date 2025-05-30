@@ -357,8 +357,7 @@ export default function MenusManager() {
                   className="font-mono bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
                 />
                 <p className="text-xs text-blue-300">
-                  Use \n para quebras de linha. Você pode incluir emojis para
-                  ilustrar as opções.
+                  Você pode incluir emojis para ilustrar as opções.
                 </p>
               </div>
               <div className="grid gap-2">

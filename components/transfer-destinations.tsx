@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Edit, Save, Loader2, CheckCircle, AlertCircle, RefreshCw } from "lucide-react";
+import { Edit, Save, Loader2, CheckCircle, AlertCircle, RefreshCw, Trash2, Plus } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -26,23 +26,35 @@ type Destino = {
   descricao?: string;
 };
 
+type EtapaEncaminhamentoDireto = {
+  id: string;
+  nome: string;
+};
+
 export default function TransferDestinations() {
   const [destinos, setDestinos] = useState<Destino[]>([]);
+  const [etapasEncaminhamentoDireto, setEtapasEncaminhamentoDireto] = useState<EtapaEncaminhamentoDireto[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [editingDestino, setEditingDestino] = useState<Destino | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
+  const [isEtapasModalOpen, setIsEtapasModalOpen] = useState(false);
+  const [novaEtapa, setNovaEtapa] = useState<string>("");
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [etapaToDelete, setEtapaToDelete] = useState<EtapaEncaminhamentoDireto | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Função utilitária para requisições autenticadas
-  function getAuthHeaders() {
-    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
-    return token ? { Authorization: `Bearer ${token}` } : {};
+  function getAuthHeaders(): Record<string, string> {
+    const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
   }
 
   useEffect(() => {
     fetchDestinos();
+    fetchEtapasEncaminhamentoDireto();
   }, []);
 
   const fetchDestinos = async () => {
@@ -230,6 +242,121 @@ export default function TransferDestinations() {
     }
   };
 
+  // Função para buscar etapas de encaminhamento direto
+  const fetchEtapasEncaminhamentoDireto = async () => {
+    try {
+      const response = await fetch("http://localhost:3000/api/fluxo", {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
+      if (!response.ok) throw new Error("Erro ao buscar etapas de encaminhamento direto");
+      const data = await response.json();
+      
+      // Transforma o array de strings em objetos com id e nome
+      const etapas = data.etapasDeEncaminhamentoDireto?.map((etapa: string, index: number) => ({
+        id: `etapa-${index}`,
+        nome: etapa
+      })) || [];
+      
+      setEtapasEncaminhamentoDireto(etapas);
+    } catch (err) {
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar as etapas de encaminhamento direto.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Função para adicionar uma nova etapa
+  const adicionarEtapa = async () => {
+    if (!novaEtapa.trim()) return;
+    try {
+      const responseGet = await fetch('http://localhost:3000/api/fluxo', {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
+      
+      if (!responseGet.ok) throw new Error('Erro ao buscar etapas');
+      const data = await responseGet.json();
+      
+      const etapasAtualizadas = [...data.etapasDeEncaminhamentoDireto, novaEtapa];
+      
+      const responsePatch = await fetch('http://localhost:3000/api/fluxo/etapasDeEncaminhamentoDireto', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify(etapasAtualizadas),
+      });
+      
+      if (!responsePatch.ok) throw new Error('Erro ao adicionar etapa');
+      
+      await fetchEtapasEncaminhamentoDireto();
+      setNovaEtapa('');
+      toast({
+        title: 'Sucesso',
+        description: 'Etapa adicionada com sucesso.',
+        open: true,
+      });
+    } catch (err) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível adicionar a etapa.',
+        open: true,
+      });
+    }
+  };
+
+  // Função para remover uma etapa
+  const removerEtapa = async (etapaNome: string) => {
+    setIsDeleting(true);
+    try {
+      const responseGet = await fetch('http://localhost:3000/api/fluxo', {
+        headers: {
+          ...getAuthHeaders(),
+        },
+      });
+      
+      if (!responseGet.ok) throw new Error('Erro ao buscar etapas');
+      const data = await responseGet.json();
+      
+      const etapasAtualizadas = data.etapasDeEncaminhamentoDireto
+        .filter((etapa: string) => etapa !== etapaNome);
+      
+      const responsePatch = await fetch('http://localhost:3000/api/fluxo/etapasDeEncaminhamentoDireto', {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(),
+        },
+        body: JSON.stringify(etapasAtualizadas),
+      });
+      
+      if (!responsePatch.ok) throw new Error('Erro ao atualizar etapas');
+      
+      await fetchEtapasEncaminhamentoDireto();
+      toast({
+        title: 'Sucesso',
+        description: 'Etapa removida com sucesso.',
+        open: true,
+      });
+    } catch (err) {
+      toast({
+        title: 'Erro',
+        description: 'Não foi possível remover a etapa.',
+        open: true,
+      });
+    } finally {
+      setIsDeleting(false);
+      setDeleteDialogOpen(false);
+      setEtapaToDelete(null);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64 bg-gradient-to-br from-slate-900/80 to-blue-900/60">
@@ -258,14 +385,23 @@ export default function TransferDestinations() {
             Configure os números para onde as transferências serão encaminhadas.
           </p>
         </div>
-        <Button
-          onClick={fetchDestinos}
-          variant="outline"
-          className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
-        >
-        <RefreshCw className="h-4 w-4 mr-2" />
-          Atualizar
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={fetchDestinos}
+            variant="outline"
+            className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Atualizar
+          </Button>
+          <Button
+            onClick={() => setIsEtapasModalOpen(true)}
+            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Etapas de Encaminhamento
+          </Button>
+        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
@@ -379,6 +515,115 @@ export default function TransferDestinations() {
                   <Save className="mr-2 h-4 w-4" />
                   Salvar alterações
                 </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal para etapas de encaminhamento direto */}
+      <Dialog open={isEtapasModalOpen} onOpenChange={setIsEtapasModalOpen}>
+        <DialogContent className="sm:max-w-[90vw] md:max-w-[600px] max-h-[90vh] overflow-y-auto backdrop-blur-md bg-white/5 border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white-100">Etapas de Encaminhamento Direto</DialogTitle>
+            <DialogDescription className="text-white-200">
+              Gerencie as etapas de encaminhamento direto disponíveis.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="novaEtapa" className="text-white-200">Adicionar Nova Etapa</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id="novaEtapa"
+                  value={novaEtapa}
+                  onChange={(e) => setNovaEtapa(e.target.value)}
+                  placeholder="Nome da etapa"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white-200/50"
+                />
+                <Button
+                  onClick={adicionarEtapa}
+                  className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-white-200">Etapas Existentes</Label>
+              {etapasEncaminhamentoDireto.length === 0 ? (
+                <p className="text-sm text-white-300">Nenhuma etapa cadastrada.</p>
+              ) : (
+                <div className="space-y-2">
+                  {etapasEncaminhamentoDireto.map((etapa) => (
+                    <div key={etapa.id} className="flex items-center justify-between p-2 bg-white/5 rounded">
+                      <span className="text-white-200">{etapa.nome}</span>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => {
+                          setDeleteDialogOpen(true);
+                          setEtapaToDelete(etapa);
+                        }}
+                        className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsEtapasModalOpen(false)}
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+            >
+              Fechar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de confirmação de exclusão */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent className="sm:max-w-[90vw] md:max-w-[400px] max-h-[90vh] overflow-y-auto backdrop-blur-md bg-white/5 border-white/10 text-white">
+          <DialogHeader>
+            <DialogTitle className="text-white-100">Excluir Etapa</DialogTitle>
+            <DialogDescription className="text-white-200">
+              Tem certeza que deseja excluir a etapa <span className="font-bold text-red-300">{etapaToDelete?.nome}</span>?<br />
+              Esta ação não poderá ser desfeita.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setDeleteDialogOpen(false)}
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={async () => {
+                if (etapaToDelete) {
+                  await removerEtapa(etapaToDelete.nome);
+                }
+              }}
+              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
+              disabled={isDeleting}
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Removendo...
+                </>
+              ) : (
+                "Remover"
               )}
             </Button>
           </DialogFooter>
