@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
+import { useFetchWithAuth } from "@/lib/fetchWithAuth";
 
 type Mensagem = {
   id: string;
@@ -33,6 +34,7 @@ export default function SystemMessages() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
+  const fetchWithAuth = useFetchWithAuth();
 
   useEffect(() => {
     fetchMensagens();
@@ -49,12 +51,12 @@ export default function SystemMessages() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:3000/api/mensagens", {
+      const response = await fetchWithAuth("http://localhost:3000/api/mensagens", {
         headers: {
           ...getAuthHeaders(),
         },
       });
-      if (!response.ok) throw new Error("Erro ao buscar mensagens");
+      if (!response) return;
       const data = await response.json();
       const mensagensArray = Object.entries(data).map(([id, conteudo]) => {
         const titulo = id
@@ -84,7 +86,7 @@ export default function SystemMessages() {
     setIsSaving(true);
     setSaveSuccess(null);
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         `http://localhost:3000/api/mensagens/${editingMessage.id}`,
         {
           method: "PUT",
@@ -95,7 +97,7 @@ export default function SystemMessages() {
           body: JSON.stringify({ conteudo: editingMessage.conteudo }),
         }
       );
-      if (!response.ok) throw new Error("Erro ao salvar mensagem");
+      if (!response) return;
       setMensagens(
         mensagens.map((msg) =>
           msg.id === editingMessage.id ? editingMessage : msg

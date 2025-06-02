@@ -20,6 +20,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useFetchWithAuth } from "@/lib/fetchWithAuth";
 
 // Tipo da ação automatizada
 export type Acao = {
@@ -54,6 +55,7 @@ export default function AcoesAutomatizadas() {
   const [menus, setMenus] = useState<MenuItem[]>([]);
   const [isMenusLoading, setIsMenusLoading] = useState(false);
   const [menusError, setMenusError] = useState<string | null>(null);
+  const fetchWithAuth = useFetchWithAuth();
 
   // Função utilitária para requisições autenticadas
   function getAuthHeaders(): HeadersInit {
@@ -69,10 +71,10 @@ export default function AcoesAutomatizadas() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:3000/api/acoes", {
+      const response = await fetchWithAuth("http://localhost:3000/api/acoes", {
         headers: getAuthHeaders() as HeadersInit,
       });
-      if (!response.ok) throw new Error("Erro ao buscar ações");
+      if (!response) return;
       const data = await response.json();
       setAcoes(data);
     } catch (err) {
@@ -87,10 +89,10 @@ export default function AcoesAutomatizadas() {
     setIsMenusLoading(true);
     setMenusError(null);
     try {
-      const response = await fetch("http://localhost:3000/api/menus", {
+      const response = await fetchWithAuth("http://localhost:3000/api/menus", {
         headers: getAuthHeaders() as HeadersInit,
       });
-      if (!response.ok) throw new Error("Erro ao buscar menus");
+      if (!response) return;
       const data = await response.json();
 
       const menusArray = Object.entries(data).map(
@@ -130,17 +132,17 @@ export default function AcoesAutomatizadas() {
     if (!acaoParaDeletar) return;
     try {
       // 1. Deletar a ação
-      const response = await fetch(`http://localhost:3000/api/acoes/${acaoParaDeletar.id}`, {
+      const response = await fetchWithAuth(`http://localhost:3000/api/acoes/${acaoParaDeletar.id}`, {
         method: "DELETE",
         headers: getAuthHeaders() as HeadersInit,
       });
-      if (!response.ok) throw new Error("Erro ao deletar ação");
+      if (!response) return;
 
       // 2. Buscar o fluxo atual para mapear a opção
-      const fluxoResponse = await fetch("http://localhost:3000/api/fluxo", {
+      const fluxoResponse = await fetchWithAuth("http://localhost:3000/api/fluxo", {
         headers: getAuthHeaders() as HeadersInit,
       });
-      if (!fluxoResponse.ok) throw new Error("Erro ao buscar o fluxo atual");
+      if (!fluxoResponse) return;
       const fluxoAtual = await fluxoResponse.json();
 
       // 3. Mapear a opção para o seu valor no fluxo
@@ -154,7 +156,7 @@ export default function AcoesAutomatizadas() {
           );
 
           // 5. Enviar o array atualizado
-          const fluxoUpdateResponse = await fetch(
+          const fluxoUpdateResponse = await fetchWithAuth(
             "http://localhost:3000/api/fluxo/etapasAjudoEmMaisInformacoes",
             {
               method: "PATCH",
@@ -165,15 +167,15 @@ export default function AcoesAutomatizadas() {
               body: JSON.stringify(etapasAtualizadas),
             }
           );
-          if (!fluxoUpdateResponse.ok) throw new Error("Erro ao atualizar o fluxo");
+          if (!fluxoUpdateResponse) return;
         }
       }
 
       // 6. Atualizar a lista de ações
-      const acoesResponse = await fetch("http://localhost:3000/api/acoes", {
+      const acoesResponse = await fetchWithAuth("http://localhost:3000/api/acoes", {
         headers: getAuthHeaders() as HeadersInit,
       });
-      if (!acoesResponse.ok) throw new Error("Erro ao buscar ações");
+      if (!acoesResponse) return;
       const acoes = await acoesResponse.json();
       setAcoes(acoes.filter((a: Acao) => a.id !== acaoParaDeletar.id));
       toast({
@@ -208,7 +210,7 @@ export default function AcoesAutomatizadas() {
         formData.append("acao_tipo", editingAcao.acao_tipo);
         formData.append("conteudo", editingAcao.conteudo);
         if (arquivo) formData.append("arquivo", arquivo);
-        response = await fetch(isCreating ? "http://localhost:3000/api/acoes" : `http://localhost:3000/api/acoes/${editingAcao.id}`, {
+        response = await fetchWithAuth(isCreating ? "http://localhost:3000/api/acoes" : `http://localhost:3000/api/acoes/${editingAcao.id}`, {
           method: isCreating ? "POST" : "PUT",
           headers: {
             ...(getAuthHeaders() as HeadersInit),
@@ -216,7 +218,7 @@ export default function AcoesAutomatizadas() {
           body: formData,
         });
       } else {
-        response = await fetch(isCreating ? "http://localhost:3000/api/acoes" : `http://localhost:3000/api/acoes/${editingAcao.id}`, {
+        response = await fetchWithAuth(isCreating ? "http://localhost:3000/api/acoes" : `http://localhost:3000/api/acoes/${editingAcao.id}`, {
           method: isCreating ? "POST" : "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -234,7 +236,7 @@ export default function AcoesAutomatizadas() {
           }),
         });
       }
-      if (!response.ok) throw new Error("Erro ao salvar ação");
+      if (!response) return;
       
       // Atualizar o fluxo se for uma nova ação
       if (isCreating) {
@@ -243,10 +245,10 @@ export default function AcoesAutomatizadas() {
         if (!menuSelecionado) throw new Error("Menu não encontrado");
 
         // 2. Mapear a opção selecionada para o seu valor no fluxo (ex: "1" → "matriculas_infantil")
-        const fluxoResponse = await fetch("http://localhost:3000/api/fluxo", {
+        const fluxoResponse = await fetchWithAuth("http://localhost:3000/api/fluxo", {
           headers: getAuthHeaders() as HeadersInit,
         });
-        if (!fluxoResponse.ok) throw new Error("Erro ao buscar o fluxo atual");
+        if (!fluxoResponse) return;
         const fluxoAtual = await fluxoResponse.json();
 
         const etapaNoFluxo = fluxoAtual[editingAcao.etapa];
@@ -262,7 +264,7 @@ export default function AcoesAutomatizadas() {
         ].filter((etapa, index, self) => self.indexOf(etapa) === index);
 
         // 4. Enviar o array atualizado
-        const fluxoUpdateResponse = await fetch(
+        const fluxoUpdateResponse = await fetchWithAuth(
           "http://localhost:3000/api/fluxo/etapasAjudoEmMaisInformacoes",
           {
             method: "PATCH",
@@ -273,7 +275,7 @@ export default function AcoesAutomatizadas() {
             body: JSON.stringify(etapasAtualizadas),
           }
         );
-        if (!fluxoUpdateResponse.ok) throw new Error("Erro ao atualizar o fluxo");
+        if (!fluxoUpdateResponse) return;
       }
       
       setSaveSuccess(true);

@@ -18,6 +18,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
+import { useFetchWithAuth } from "@/lib/fetchWithAuth";
 
 type Destino = {
   id: string;
@@ -45,6 +46,7 @@ export default function TransferDestinations() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [etapaToDelete, setEtapaToDelete] = useState<EtapaEncaminhamentoDireto | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+  const fetchWithAuth = useFetchWithAuth();
 
   // Função utilitária para requisições autenticadas
   function getAuthHeaders(): Record<string, string> {
@@ -61,14 +63,13 @@ export default function TransferDestinations() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:3000/api/destinos", {
+      const response = await fetchWithAuth("http://localhost:3000/api/destinos", {
         headers: {
           ...getAuthHeaders(),
         },
       });
-      if (!response.ok) throw new Error("Erro ao buscar destinos");
+      if (!response) return;
       const data = await response.json();
-
       const destinosArray = Object.entries(data).map(
         ([id, info]: [string, any]) => {
           const titulo = id
@@ -87,7 +88,6 @@ export default function TransferDestinations() {
           };
         }
       );
-
       setDestinos(destinosArray);
     } catch (err) {
       setError(
@@ -100,12 +100,12 @@ export default function TransferDestinations() {
 
   const fetchDestinoById = async (id: string) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/destinos/${id}`, {
+      const response = await fetchWithAuth(`http://localhost:3000/api/destinos/${id}`, {
         headers: {
           ...getAuthHeaders(),
         },
       });
-      if (!response.ok) throw new Error("Erro ao buscar destino");
+      if (!response) return null;
       const data = await response.json();
       return {
         id,

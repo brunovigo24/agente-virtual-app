@@ -48,6 +48,7 @@ import {
   AlertDialogAction,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
+import { useFetchWithAuth } from "@/lib/fetchWithAuth";
 
 type MenuItem = {
   id: string;
@@ -68,6 +69,8 @@ export default function MenusManager() {
   const [isCreating, setIsCreating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
+  const fetchWithAuth = useFetchWithAuth();
+
   // Função utilitária para requisições autenticadas
   function getAuthHeaders() {
     const token =
@@ -83,12 +86,12 @@ export default function MenusManager() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch("http://localhost:3000/api/menus", {
+      const response = await fetchWithAuth("http://localhost:3000/api/menus", {
         headers: {
           ...getAuthHeaders(),
         },
       });
-      if (!response.ok) throw new Error("Erro ao buscar menus");
+      if (!response) return;
       const data = await response.json();
       const menusArray = Object.entries(data).map(
         ([id, menu]: [string, any]) => ({
@@ -133,7 +136,7 @@ export default function MenusManager() {
     setIsSaving(true);
     setSaveSuccess(null);
     try {
-      const response = await fetch(
+      const response = await fetchWithAuth(
         isCreating
           ? "http://localhost:3000/api/menus"
           : `http://localhost:3000/api/menus/${editingMenu.id}`,
@@ -150,7 +153,7 @@ export default function MenusManager() {
           }),
         }
       );
-      if (!response.ok) throw new Error("Erro ao salvar menu");
+      if (!response) return;
       if (isCreating) {
         toast({
           title: "Menu criado",

@@ -23,7 +23,22 @@ export default function LoginPage() {
     // Check if user is already logged in
     const token = localStorage.getItem("authToken")
     if (token) {
-      router.push("/dashboard")
+      // Testa o token na API antes de redirecionar
+      (async () => {
+        try {
+          const response = await fetch("http://localhost:3000/api/menus", {
+            headers: { Authorization: `Bearer ${token}` },
+          })
+          if (response.ok) {
+            router.push("/dashboard")
+          } else {
+            localStorage.removeItem("authToken")
+          }
+        } catch {
+          // API offline
+          localStorage.removeItem("authToken")
+        }
+      })()
     }
   }, [router])
 

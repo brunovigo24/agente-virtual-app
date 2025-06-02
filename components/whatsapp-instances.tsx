@@ -28,6 +28,7 @@ import { motion } from "framer-motion"
 import Image from "next/image"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { useFetchWithAuth } from "@/lib/fetchWithAuth"
 
 // Tipos
 type WhatsAppInstance = {
@@ -72,6 +73,7 @@ export default function WhatsAppInstances() {
   const [pollingActive, setPollingActive] = useState<Record<string, boolean>>({})
   const pollingIntervalRef = useRef<Record<string, NodeJS.Timeout | null>>({})
   const [error, setError] = useState<string | null>(null)
+  const fetchWithAuth = useFetchWithAuth()
 
   // Carregar instâncias
   useEffect(() => {
@@ -94,10 +96,10 @@ export default function WhatsAppInstances() {
   const fetchInstances = async () => {
     setIsLoading(true)
     try {
-      const response = await fetch('http://localhost:3000/api/evolution/instance/fetchInstances', {
+      const response = await fetchWithAuth('http://localhost:3000/api/evolution/instance/fetchInstances', {
         headers: getAuthHeaders(),
       })
-      if (!response.ok) throw new Error("Erro ao buscar instâncias")
+      if (!response) return;
       let data = await response.json()
       // Normaliza o status
       data = data.map((instance: any) => ({
@@ -180,7 +182,7 @@ export default function WhatsAppInstances() {
   const handleCreateInstance = async () => {
     setIsCreating(true)
     try {
-      const response = await fetch('http://localhost:3000/api/evolution/instance/create', {
+      const response = await fetchWithAuth('http://localhost:3000/api/evolution/instance/create', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -188,9 +190,9 @@ export default function WhatsAppInstances() {
           numero: getOnlyDigits(newInstanceNumber),
         }),
       })
+      if (!response) return;
       const responseBody = await response.text()
       console.log("CREATE RESPONSE", response.status, responseBody)
-      if (!response.ok) throw new Error("Erro ao criar instância")
       toast({
         title: "Sucesso",
         description: "Nova instância criada com sucesso.",
