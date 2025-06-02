@@ -236,12 +236,6 @@ export default function Dashboard() {
                           {activeContent === "instances" && (
                             <ChevronRight className="ml-auto h-4 w-4 text-blue-500" />
                           )}
-                                                    <Badge
-                            variant="destructive"
-                            className="ml-auto bg-gradient-to-r from-red-500 to-red-600 text-white text-xs"
-                          >
-                            Beta
-                          </Badge>
                         </button>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
