@@ -21,6 +21,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useFetchWithAuth } from "@/lib/fetchWithAuth";
+import { API_BASE_URL } from "@/lib/apiBaseUrl"
 
 // Tipo da ação automatizada
 export type Acao = {
@@ -71,7 +72,7 @@ export default function AcoesAutomatizadas() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetchWithAuth("http://localhost:3000/api/acoes", {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/acoes`, {
         headers: getAuthHeaders() as HeadersInit,
       });
       if (!response) return;
@@ -89,7 +90,7 @@ export default function AcoesAutomatizadas() {
     setIsMenusLoading(true);
     setMenusError(null);
     try {
-      const response = await fetchWithAuth("http://localhost:3000/api/menus", {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/menus`, {
         headers: getAuthHeaders() as HeadersInit,
       });
       if (!response) return;
@@ -132,14 +133,14 @@ export default function AcoesAutomatizadas() {
     if (!acaoParaDeletar) return;
     try {
       // 1. Deletar a ação
-      const response = await fetchWithAuth(`http://localhost:3000/api/acoes/${acaoParaDeletar.id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/acoes/${acaoParaDeletar.id}`, {
         method: "DELETE",
         headers: getAuthHeaders() as HeadersInit,
       });
       if (!response) return;
 
       // 2. Buscar o fluxo atual para mapear a opção
-      const fluxoResponse = await fetchWithAuth("http://localhost:3000/api/fluxo", {
+      const fluxoResponse = await fetchWithAuth(`${API_BASE_URL}/api/fluxo`, {
         headers: getAuthHeaders() as HeadersInit,
       });
       if (!fluxoResponse) return;
@@ -157,7 +158,7 @@ export default function AcoesAutomatizadas() {
 
           // 5. Enviar o array atualizado
           const fluxoUpdateResponse = await fetchWithAuth(
-            "http://localhost:3000/api/fluxo/etapasAjudoEmMaisInformacoes",
+            `${API_BASE_URL}/api/fluxo/etapasAjudoEmMaisInformacoes`,
             {
               method: "PATCH",
               headers: {
@@ -172,7 +173,7 @@ export default function AcoesAutomatizadas() {
       }
 
       // 6. Atualizar a lista de ações
-      const acoesResponse = await fetchWithAuth("http://localhost:3000/api/acoes", {
+      const acoesResponse = await fetchWithAuth(`${API_BASE_URL}/api/acoes`, {
         headers: getAuthHeaders() as HeadersInit,
       });
       if (!acoesResponse) return;
@@ -210,7 +211,7 @@ export default function AcoesAutomatizadas() {
         formData.append("acao_tipo", editingAcao.acao_tipo);
         formData.append("conteudo", editingAcao.conteudo);
         if (arquivo) formData.append("arquivo", arquivo);
-        response = await fetchWithAuth(isCreating ? "http://localhost:3000/api/acoes" : `http://localhost:3000/api/acoes/${editingAcao.id}`, {
+        response = await fetchWithAuth(isCreating ? `${API_BASE_URL}/api/acoes` : `${API_BASE_URL}/api/acoes/${editingAcao.id}`, {
           method: isCreating ? "POST" : "PUT",
           headers: {
             ...(getAuthHeaders() as HeadersInit),
@@ -218,7 +219,7 @@ export default function AcoesAutomatizadas() {
           body: formData,
         });
       } else {
-        response = await fetchWithAuth(isCreating ? "http://localhost:3000/api/acoes" : `http://localhost:3000/api/acoes/${editingAcao.id}`, {
+        response = await fetchWithAuth(isCreating ? `${API_BASE_URL}/api/acoes` : `${API_BASE_URL}/api/acoes/${editingAcao.id}`, {
           method: isCreating ? "POST" : "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -245,7 +246,7 @@ export default function AcoesAutomatizadas() {
         if (!menuSelecionado) throw new Error("Menu não encontrado");
 
         // 2. Mapear a opção selecionada para o seu valor no fluxo (ex: "1" → "matriculas_infantil")
-        const fluxoResponse = await fetchWithAuth("http://localhost:3000/api/fluxo", {
+        const fluxoResponse = await fetchWithAuth(`${API_BASE_URL}/api/fluxo`, {
           headers: getAuthHeaders() as HeadersInit,
         });
         if (!fluxoResponse) return;
@@ -265,7 +266,7 @@ export default function AcoesAutomatizadas() {
 
         // 4. Enviar o array atualizado
         const fluxoUpdateResponse = await fetchWithAuth(
-          "http://localhost:3000/api/fluxo/etapasAjudoEmMaisInformacoes",
+          `${API_BASE_URL}/api/fluxo/etapasAjudoEmMaisInformacoes`,
           {
             method: "PATCH",
             headers: {

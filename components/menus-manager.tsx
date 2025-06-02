@@ -49,6 +49,7 @@ import {
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
 import { useFetchWithAuth } from "@/lib/fetchWithAuth";
+import { API_BASE_URL } from "@/lib/apiBaseUrl";
 
 type MenuItem = {
   id: string;
@@ -86,7 +87,7 @@ export default function MenusManager() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetchWithAuth("http://localhost:3000/api/menus", {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/menus`, {
         headers: {
           ...getAuthHeaders(),
         },
@@ -138,8 +139,8 @@ export default function MenusManager() {
     try {
       const response = await fetchWithAuth(
         isCreating
-          ? "http://localhost:3000/api/menus"
-          : `http://localhost:3000/api/menus/${editingMenu.id}`,
+          ? `${API_BASE_URL}/api/menus`
+          : `${API_BASE_URL}/api/menus/${editingMenu.id}`,
         {
           method: isCreating ? "POST" : "PUT",
           headers: {

@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Lock, User, AlertCircle } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
+import { API_BASE_URL } from "@/lib/apiBaseUrl"
 
 export default function LoginPage() {
   const [username, setUsername] = useState("")
@@ -26,7 +27,7 @@ export default function LoginPage() {
       // Testa o token na API antes de redirecionar
       (async () => {
         try {
-          const response = await fetch("http://localhost:3000/api/menus", {
+          const response = await fetch(`${API_BASE_URL}/api/menus`, {
             headers: { Authorization: `Bearer ${token}` },
           })
           if (response.ok) {
@@ -48,7 +49,7 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch("http://localhost:3000/api/auth/login", {
+      const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

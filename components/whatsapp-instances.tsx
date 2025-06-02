@@ -29,6 +29,7 @@ import Image from "next/image"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
 import { useFetchWithAuth } from "@/lib/fetchWithAuth"
+import { API_BASE_URL } from "@/lib/apiBaseUrl"
 
 // Tipos
 type WhatsAppInstance = {
@@ -96,7 +97,7 @@ export default function WhatsAppInstances() {
   const fetchInstances = async () => {
     setIsLoading(true)
     try {
-      const response = await fetchWithAuth('http://localhost:3000/api/evolution/instance/fetchInstances', {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/evolution/instance/fetchInstances`, {
         headers: getAuthHeaders(),
       })
       if (!response) return;
@@ -182,7 +183,7 @@ export default function WhatsAppInstances() {
   const handleCreateInstance = async () => {
     setIsCreating(true)
     try {
-      const response = await fetchWithAuth('http://localhost:3000/api/evolution/instance/create', {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/evolution/instance/create`, {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({
@@ -218,7 +219,7 @@ export default function WhatsAppInstances() {
     try {
       const instance = instances.find(i => i.id === id)
       if (!instance) throw new Error("Instância não encontrada")
-      const response = await fetch(`http://localhost:3000/api/evolution/instance/connect/${instance.name}`, {
+      const response = await fetch(`${API_BASE_URL}/api/evolution/instance/connect/${instance.name}`, {
         method: 'POST',
         headers: getAuthHeaders(),
       })
@@ -243,7 +244,7 @@ export default function WhatsAppInstances() {
     try {
       const instance = instances.find(i => i.id === id)
       if (!instance) throw new Error("Instância não encontrada")
-      const response = await fetch(`http://localhost:3000/api/evolution/instance/logout/${instance.name}`, {
+      const response = await fetch(`${API_BASE_URL}/api/evolution/instance/logout/${instance.name}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       })
@@ -269,7 +270,7 @@ export default function WhatsAppInstances() {
     try {
       const instance = instances.find(i => i.id === id)
       if (!instance) throw new Error("Instância não encontrada")
-      const response = await fetch(`http://localhost:3000/api/evolution/instance/delete/${instance.name}`, {
+      const response = await fetch(`${API_BASE_URL}/api/evolution/instance/delete/${instance.name}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       })
@@ -321,7 +322,7 @@ export default function WhatsAppInstances() {
       }))
     }
     try {
-      const response = await fetch(`http://localhost:3000/api/evolution/instance/connect/${instanceName}`, {
+      const response = await fetch(`${API_BASE_URL}/api/evolution/instance/connect/${instanceName}`, {
         headers: getAuthHeaders(),
       })
       if (!response.ok) throw new Error("Erro ao buscar QR Code")

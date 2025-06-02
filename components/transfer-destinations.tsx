@@ -19,6 +19,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
 import { useFetchWithAuth } from "@/lib/fetchWithAuth";
+import { API_BASE_URL } from "@/lib/apiBaseUrl"
 
 type Destino = {
   id: string;
@@ -63,7 +64,7 @@ export default function TransferDestinations() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetchWithAuth("http://localhost:3000/api/destinos", {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/destinos`, {
         headers: {
           ...getAuthHeaders(),
         },
@@ -100,7 +101,7 @@ export default function TransferDestinations() {
 
   const fetchDestinoById = async (id: string) => {
     try {
-      const response = await fetchWithAuth(`http://localhost:3000/api/destinos/${id}`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/destinos/${id}`, {
         headers: {
           ...getAuthHeaders(),
         },
@@ -200,7 +201,7 @@ export default function TransferDestinations() {
       const numeroSomenteDigitos = getOnlyDigits(editingDestino.numero);
 
       const response = await fetch(
-        `http://localhost:3000/api/destinos/${editingDestino.id}`,
+        `${API_BASE_URL}/api/destinos/${editingDestino.id}`,
         {
           method: "PUT",
           headers: {
@@ -245,7 +246,7 @@ export default function TransferDestinations() {
   // Função para buscar etapas de encaminhamento direto
   const fetchEtapasEncaminhamentoDireto = async () => {
     try {
-      const response = await fetch("http://localhost:3000/api/fluxo", {
+      const response = await fetch(`${API_BASE_URL}/api/fluxo`, {
         headers: {
           ...getAuthHeaders(),
         },
@@ -273,7 +274,7 @@ export default function TransferDestinations() {
   const adicionarEtapa = async () => {
     if (!novaEtapa.trim()) return;
     try {
-      const responseGet = await fetch('http://localhost:3000/api/fluxo', {
+      const responseGet = await fetch(`${API_BASE_URL}/api/fluxo`, {
         headers: {
           ...getAuthHeaders(),
         },
@@ -284,7 +285,7 @@ export default function TransferDestinations() {
       
       const etapasAtualizadas = [...data.etapasDeEncaminhamentoDireto, novaEtapa];
       
-      const responsePatch = await fetch('http://localhost:3000/api/fluxo/etapasDeEncaminhamentoDireto', {
+      const responsePatch = await fetch(`${API_BASE_URL}/api/fluxo/etapasDeEncaminhamentoDireto`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -315,7 +316,7 @@ export default function TransferDestinations() {
   const removerEtapa = async (etapaNome: string) => {
     setIsDeleting(true);
     try {
-      const responseGet = await fetch('http://localhost:3000/api/fluxo', {
+      const responseGet = await fetch(`${API_BASE_URL}/api/fluxo`, {
         headers: {
           ...getAuthHeaders(),
         },
@@ -327,7 +328,7 @@ export default function TransferDestinations() {
       const etapasAtualizadas = data.etapasDeEncaminhamentoDireto
         .filter((etapa: string) => etapa !== etapaNome);
       
-      const responsePatch = await fetch('http://localhost:3000/api/fluxo/etapasDeEncaminhamentoDireto', {
+      const responsePatch = await fetch(`${API_BASE_URL}/api/fluxo/etapasDeEncaminhamentoDireto`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

@@ -19,6 +19,7 @@ import { toast } from "@/components/ui/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { motion } from "framer-motion";
 import { useFetchWithAuth } from "@/lib/fetchWithAuth";
+import { API_BASE_URL } from "@/lib/apiBaseUrl";
 
 type Mensagem = {
   id: string;
@@ -51,7 +52,7 @@ export default function SystemMessages() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetchWithAuth("http://localhost:3000/api/mensagens", {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/mensagens`, {
         headers: {
           ...getAuthHeaders(),
         },
@@ -87,7 +88,7 @@ export default function SystemMessages() {
     setSaveSuccess(null);
     try {
       const response = await fetchWithAuth(
-        `http://localhost:3000/api/mensagens/${editingMessage.id}`,
+        `${API_BASE_URL}/api/mensagens/${editingMessage.id}`,
         {
           method: "PUT",
           headers: {
