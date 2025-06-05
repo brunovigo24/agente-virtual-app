@@ -479,7 +479,7 @@ export default function WhatsAppInstances() {
           <span className="ml-2 text-blue-100">Carregando instâncias...</span>
         </div>
       ) : filteredInstances.length === 0 ? (
-        <Card className="bg-white/5 border-white/10 shadow-xl backdrop-blur-sm text-white">
+        <Card className="bg-white/5 border-white/10 shadow-xl backdrop-blur-sm text-white rounded-2xl">
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="rounded-full bg-blue-500/10 p-3 mb-4">
               <Search className="h-6 w-6 text-blue-200" />

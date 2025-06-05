@@ -99,30 +99,7 @@ export default function TransferDestinations() {
     }
   };
 
-  const fetchDestinoById = async (id: string) => {
-    try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/destinos/${id}`, {
-        headers: {
-          ...getAuthHeaders(),
-        },
-      });
-      if (!response) return null;
-      const data = await response.json();
-      return {
-        id,
-        titulo: id
-          .replace(/_menu$/, "")
-          .replace(/_/g, " ")
-          .replace(/([A-Z])/g, " $1")
-          .replace(/^./, (str) => str.toUpperCase())
-          .replace(/([a-z])([A-Z])/g, "$1 $2"),
-        numero: data.numero || data.conteudo || "",
-        descricao: data.descricao || "",
-      };
-    } catch {
-      return null;
-    }
-  };
+
 
   // Formatar o número enquanto digita
   function formatPhoneNumber(value: string) {
@@ -159,11 +136,10 @@ export default function TransferDestinations() {
     return digits.length >= 13;
   }
 
-  const handleEdit = async (destino: Destino) => {
+  const handleEdit = (destino: Destino) => {
     setSaveSuccess(null);
     setIsDialogOpen(true);
-    const apiDestino = await fetchDestinoById(destino.id);
-    setEditingDestino(apiDestino || destino);
+    setEditingDestino(destino);
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -189,7 +165,7 @@ export default function TransferDestinations() {
         title: "Número inválido",
         description:
           "Inclua o código do país (ex: 55) e o DDD (ex: 44) no número.",
-        variant: "destructive",
+        open: true,
       });
       return;
     }
@@ -225,6 +201,7 @@ export default function TransferDestinations() {
       toast({
         title: "Destino atualizado",
         description: `O número para "${editingDestino.titulo}" foi atualizado com sucesso.`,
+        open: true,
       });
 
       setTimeout(() => {
@@ -236,7 +213,7 @@ export default function TransferDestinations() {
       toast({
         title: "Erro ao salvar",
         description: "Não foi possível atualizar o destino.",
-        variant: "destructive",
+        open: true,
       });
     } finally {
       setIsSaving(false);
@@ -265,7 +242,7 @@ export default function TransferDestinations() {
       toast({
         title: "Erro",
         description: "Não foi possível carregar as etapas de encaminhamento direto.",
-        variant: "destructive",
+        open: true,
       });
     }
   };
@@ -477,7 +454,7 @@ export default function TransferDestinations() {
                     inputMode="numeric"
                     pattern="\+?\d*"
                     maxLength={20}
-                    className="bg-white/10 border-white/20 text-white placeholder:text-white-200/50"
+                    className="bg-white/10 border-white/20 text-white placeholder:text-white-200/50 rounded-2xl"
                   />
                 </div>
                 <p className="text-xs text-white-300">
