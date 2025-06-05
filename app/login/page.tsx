@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Lock, User, AlertCircle } from "lucide-react"
+import { Lock, User, AlertCircle, Eye, EyeOff } from "lucide-react"
 import Image from "next/image"
 import { motion } from "framer-motion"
 import { API_BASE_URL } from "@/lib/apiBaseUrl"
@@ -18,6 +18,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [showPassword, setShowPassword] = useState(false)
   const router = useRouter()
 
   useEffect(() => {
@@ -173,7 +174,7 @@ export default function LoginPage() {
                       Usuário
                     </Label>
                     <div className="relative">
-                      <User className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
+                      <User className="absolute left-3 top-3 h-4 w-4 text-blue-600" />
                       <Input
                         id="username"
                         type="text"
@@ -189,15 +190,23 @@ export default function LoginPage() {
                       Senha
                     </Label>
                     <div className="relative">
-                      <Lock className="absolute left-3 top-3 h-4 w-4 text-blue-300" />
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-blue-600" />
                       <Input
                         id="password"
-                        type="password"
+                        type={showPassword ? "text" : "password"}
                         placeholder="••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 focus:border-blue-400 transition-all rounded-2xl"
+                        className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-blue-200 focus:border-blue-600 transition-all rounded-2xl [&:not([type=password])]:text-gray-900"
+                        style={{ color: showPassword ? '#1f2937' : '#ffffff' }}
                       />
+                      <button
+                        type="button"
+                        onClick={() => setShowPassword(!showPassword)}
+                        className="absolute right-3 top-3 h-4 w-4 text-blue-600 hover:text-blue-500 transition-colors"
+                      >
+                        {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      </button>
                     </div>
                   </div>
                   <div className="flex items-center justify-between pt-2">
