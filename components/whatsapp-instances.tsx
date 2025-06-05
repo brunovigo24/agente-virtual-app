@@ -270,21 +270,26 @@ export default function WhatsAppInstances() {
     try {
       const instance = instances.find(i => i.id === id)
       if (!instance) throw new Error("Instância não encontrada")
+      
       const response = await fetch(`${API_BASE_URL}/api/evolution/instance/delete/${instance.name}`, {
         method: 'DELETE',
         headers: getAuthHeaders(),
       })
       const responseBody = await response.text()
       console.log("DELETE RESPONSE", response.status, responseBody)
+      
       if (!response.ok) throw new Error("Erro ao excluir instância")
+      
+      await fetchInstances()
+      setDeleteDialogOpen(false)
+      setInstanceToDelete(null)
+      setModalInstance(null)
+      
       toast({
         title: "Sucesso",
         description: "Instância excluída com sucesso.",
         open: true,
       })
-      fetchInstances()
-      setDeleteDialogOpen(false)
-      setInstanceToDelete(null)
     } catch (error) {
       console.error("Erro ao excluir instância:", error)
       toast({
@@ -399,12 +404,11 @@ export default function WhatsAppInstances() {
         pollingIntervalRef.current[instanceName] = null
       }
     }
-    // Limpa ao desmontar/modal fechar
+    // Limpa ao desmontar/modal fechar (sem fetchInstances automático)
     return () => {
       if (pollingIntervalRef.current[instanceName]) {
         clearInterval(pollingIntervalRef.current[instanceName]!)
         pollingIntervalRef.current[instanceName] = null
-        fetchInstances()
       }
     }
   }, [modalInstance, pollingActive, modalInstance?.connectionStatus])
