@@ -518,11 +518,11 @@ export default function TransferDestinations() {
                   value={novaEtapa}
                   onChange={(e) => setNovaEtapa(e.target.value)}
                   placeholder="Nome da etapa"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-white-200/50"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white-200/50 rounded-2xl"
                 />
                 <Button
                   onClick={adicionarEtapa}
-                  className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+                  className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
                 >
                   <Plus className="h-4 w-4" />
                 </Button>
@@ -536,7 +536,7 @@ export default function TransferDestinations() {
               ) : (
                 <div className="space-y-2">
                   {etapasEncaminhamentoDireto.map((etapa) => (
-                    <div key={etapa.id} className="flex items-center justify-between p-2 bg-white/5 rounded">
+                    <div key={etapa.id} className="flex items-center justify-between p-2 bg-white/5 rounded-2xl">
                       <span className="text-white-200">{etapa.nome}</span>
                       <Button
                         variant="ghost"
@@ -545,7 +545,7 @@ export default function TransferDestinations() {
                           setDeleteDialogOpen(true);
                           setEtapaToDelete(etapa);
                         }}
-                        className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
+                        className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-2xl"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -560,7 +560,7 @@ export default function TransferDestinations() {
             <Button
               variant="outline"
               onClick={() => setIsEtapasModalOpen(false)}
-              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
             >
               Fechar
             </Button>
@@ -582,7 +582,7 @@ export default function TransferDestinations() {
             <Button
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
-              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
             >
               Cancelar
             </Button>
@@ -592,7 +592,7 @@ export default function TransferDestinations() {
                   await removerEtapa(etapaToDelete.nome);
                 }
               }}
-              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
+              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-2xl"
               disabled={isDeleting}
             >
               {isDeleting ? (
