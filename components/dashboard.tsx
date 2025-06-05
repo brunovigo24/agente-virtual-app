@@ -126,17 +126,17 @@ export default function Dashboard() {
                         onClick={() => changeContent("menus")}
                         className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400 rounded-2xl"
                       >
-                        <button>
-                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
+                        <button className="w-full">
+                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1 shrink-0">
                             <img
                               src="/images/menu.png"
                               alt="Menus"
                               className="h-full w-full object-contain"
                             />
                           </div>
-                          <span>Menus</span>
+                          <span className="whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1 text-left">Menus</span>
                           {activeContent === "menus" && (
-                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400 shrink-0" />
                           )}
                         </button>
                       </SidebarMenuButton>
@@ -158,17 +158,17 @@ export default function Dashboard() {
                         onClick={() => changeContent("mensagens")}
                         className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400 rounded-2xl"
                       >
-                        <button>
-                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
+                        <button className="w-full">
+                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1 shrink-0">
                             <img
                               src="/images/balao.png"
                               alt="Mensagens"
                               className="h-full w-full object-contain"
                             />
                           </div>
-                          <span>Mensagens</span>
+                          <span className="whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1 text-left">Mensagens</span>
                           {activeContent === "mensagens" && (
-                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400 shrink-0" />
                           )}
                         </button>
                       </SidebarMenuButton>
@@ -180,17 +180,17 @@ export default function Dashboard() {
                         onClick={() => changeContent("acoes")}
                         className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400 rounded-2xl"
                       >
-                        <button>
-                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
+                        <button className="w-full">
+                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1 shrink-0">
                             <img
                               src="/images/engrenagem.png"
                               alt="Ações Personalizadas"
                               className="h-full w-full object-contain"
                             />
                           </div>
-                          <span>Ações personalizadas</span>
+                          <span className="whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1 text-left">Ações personalizadas</span>
                           {activeContent === "acoes" && (
-                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400 shrink-0" />
                           )}
                         </button>
                       </SidebarMenuButton>
@@ -202,17 +202,17 @@ export default function Dashboard() {
                         onClick={() => changeContent("whatsapp")}
                         className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400 rounded-2xl"
                       >
-                        <button>
-                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
+                        <button className="w-full">
+                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1 shrink-0">
                             <img
                               src="/images/whatsapp.png"
                               alt="Destinos de transferência"
                               className="h-full w-full object-contain"
                             />
                           </div>
-                          <span>Destinos de transferência</span>
+                          <span className="whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1 text-left">Destinos de transferência</span>
                           {activeContent === "whatsapp" && (
-                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400" />
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-400 shrink-0" />
                           )}
                         </button>
                       </SidebarMenuButton>
@@ -224,17 +224,17 @@ export default function Dashboard() {
                         onClick={() => changeContent("instances")}
                         className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400 rounded-2xl"
                       >
-                        <button>
-                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
+                        <button className="w-full">
+                          <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1 shrink-0">
                             <img
                               src="/images/quebra-cabeca.png"
                               alt="Instâncias WhatsApp"
                               className="h-full w-full object-contain"
                             />
                           </div>
-                          <span>Instâncias WhatsApp</span>
+                          <span className="whitespace-nowrap overflow-hidden text-ellipsis min-w-0 flex-1 text-left">Instâncias WhatsApp</span>
                           {activeContent === "instances" && (
-                            <ChevronRight className="ml-auto h-4 w-4 text-blue-500" />
+                            <ChevronRight className="ml-auto h-4 w-4 text-blue-500 shrink-0" />
                           )}
                         </button>
                       </SidebarMenuButton>
