@@ -390,14 +390,14 @@ export default function TransferDestinations() {
           <Button
             onClick={fetchDestinos}
             variant="outline"
-            className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+            className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
           <Button
             onClick={() => setIsEtapasModalOpen(true)}
-            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
           >
             <Plus className="h-4 w-4 mr-2" />
             Etapas de Encaminhamento
@@ -413,7 +413,7 @@ export default function TransferDestinations() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, delay: index * 0.1 }}
           >
-            <Card className="p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white">
+            <Card className="p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white rounded-2xl">
               <div className="flex items-start justify-between mb-2">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
@@ -438,7 +438,7 @@ export default function TransferDestinations() {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleEdit(destino)}
-                  className="text-blue-200 hover:text-white hover:bg-white/10"
+                  className="text-blue-200 hover:text-white hover:bg-white/10 rounded-2xl"
                 >
                   <Edit className="h-4 w-4 mr-2" />
                   Editar
@@ -492,14 +492,14 @@ export default function TransferDestinations() {
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
               disabled={isSaving}
-              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
             >
               {isSaving ? (
                 <>

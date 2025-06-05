@@ -434,14 +434,14 @@ export default function WhatsAppInstances() {
           <Button
             onClick={fetchInstances}
             variant="outline"
-            className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+            className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
           <Button
             onClick={() => setCreateDialogOpen(true)}
-            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
           >
             <Plus className="h-4 w-4 mr-2" />
             Instância
@@ -457,17 +457,17 @@ export default function WhatsAppInstances() {
             placeholder="Pesquisar instâncias..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+            className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 rounded-2xl"
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-full sm:w-[180px] bg-white/10 border-white/20 text-white">
-            <SelectValue placeholder="Filtrar por status" className="text-white" />
+          <SelectTrigger className="w-full sm:w-[180px] bg-white/10 border-white/20 text-white rounded-2xl">
+            <SelectValue placeholder="Filtrar por status"/>
           </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all" className="text-blue-900">Todos</SelectItem>
-            <SelectItem value="connected" className="text-blue-900">Conectados</SelectItem>
-            <SelectItem value="disconnected" className="text-blue-900">Desconectados</SelectItem>
+          <SelectContent className="bg-slate-800 border-white/10 text-white rounded-2xl">
+            <SelectItem value="all" className="rounded-2xl">Todos</SelectItem>
+            <SelectItem value="connected" className="rounded-2xl">Conectados</SelectItem>
+            <SelectItem value="disconnected" className="rounded-2xl">Desconectados</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -498,7 +498,7 @@ export default function WhatsAppInstances() {
               transition={{ duration: 0.5, delay: index * 0.1 }}
             >
               <Card
-                className={`p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white overflow-hidden transition-all duration-300`}
+                className={`p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white overflow-hidden transition-all duration-300 rounded-2xl`}
               >
                 <CardHeader className="flex flex-row items-center justify-between p-0 pb-2 border-b border-white/10">
                   <CardTitle className="text-lg font-semibold text-blue-100">{instance.name}</CardTitle>
@@ -549,21 +549,21 @@ export default function WhatsAppInstances() {
                   </div>
 
                   <div className="grid grid-cols-3 gap-2 mb-4">
-                    <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-md">
+                    <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-2xl">
                       <div className="flex items-center text-blue-200 mb-1">
                         <Users className="h-4 w-4 mr-1" />
                         <span className="text-xs">Contatos</span>
                       </div>
                       <span className="font-semibold text-blue-100">{instance._count.Contact}</span>
                     </div>
-                    <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-md">
+                    <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-2xl">
                       <div className="flex items-center text-blue-200 mb-1">
                         <MessageSquare className="h-4 w-4 mr-1" />
                         <span className="text-xs">Chats</span>
                       </div>
                       <span className="font-semibold text-blue-100">{instance._count.Chat}</span>
                     </div>
-                    <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-md">
+                    <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-2xl">
                       <div className="flex items-center text-blue-200 mb-1">
                         <Mail className="h-4 w-4 mr-1" />
                         <span className="text-xs">Mensagens</span>
@@ -592,7 +592,7 @@ export default function WhatsAppInstances() {
             <Button
               variant="outline"
               onClick={() => setDeleteDialogOpen(false)}
-              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
             >
               Cancelar
             </Button>
@@ -602,7 +602,7 @@ export default function WhatsAppInstances() {
                   await handleDeleteInstance(instanceToDelete.id)
                 }
               }}
-              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
+              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-2xl"
               disabled={isDeleting}
             >
               {isDeleting ? (
@@ -632,14 +632,14 @@ export default function WhatsAppInstances() {
               placeholder="Nome da instância"
               value={newInstanceName}
               onChange={e => setNewInstanceName(e.target.value)}
-              className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+              className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 rounded-2xl"
             />
             <Input
               placeholder="Número (ex: +55 (44) 00000-0000)"
               value={newInstanceNumber}
               onChange={e => setNewInstanceNumber(formatPhoneNumber(e.target.value))}
               inputMode="numeric"
-              className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+              className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 rounded-2xl"
             />                <p className="text-xs text-white-300">
             Formato permitido: +55 (44) 00000-0000
           </p>             
@@ -649,13 +649,13 @@ export default function WhatsAppInstances() {
             <Button
               variant="outline"
               onClick={() => setCreateDialogOpen(false)}
-              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleCreateInstance}
-              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
               disabled={!newInstanceName || !isValidPhoneNumber(newInstanceNumber) || isCreating}
             >
               {isCreating ? (
@@ -684,21 +684,21 @@ export default function WhatsAppInstances() {
             <>
               {/* Estatísticas */}
               <div className="grid grid-cols-3 gap-2 mb-4">
-                <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-md">
+                <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-2xl">
                   <div className="flex items-center text-blue-200 mb-1">
                     <Users className="h-4 w-4 mr-1" />
                     <span className="text-xs">Contatos</span>
                   </div>
                   <span className="font-semibold text-blue-100">{modalInstance._count.Contact}</span>
                 </div>
-                <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-md">
+                <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-2xl">
                   <div className="flex items-center text-blue-200 mb-1">
                     <MessageSquare className="h-4 w-4 mr-1" />
                     <span className="text-xs">Chats</span>
                   </div>
                   <span className="font-semibold text-blue-100">{modalInstance._count.Chat}</span>
                 </div>
-                <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-md">
+                <div className="flex flex-col items-center p-2 bg-blue-500/10 rounded-2xl">
                   <div className="flex items-center text-blue-200 mb-1">
                     <Mail className="h-4 w-4 mr-1" />
                     <span className="text-xs">Mensagens</span>
@@ -714,7 +714,7 @@ export default function WhatsAppInstances() {
                     <Input
                       value={showToken[modalInstance.id] ? (modalInstance.token ?? "") : "********************************"}
                       readOnly
-                      className="pr-16 font-mono text-sm bg-white/10 border-white/20 text-white"
+                      className="pr-16 font-mono text-sm bg-white/10 border-white/20 text-white rounded-2xl"
                     />
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
                       <Button
@@ -741,7 +741,7 @@ export default function WhatsAppInstances() {
               <div className="mb-4">
                 <label className="block text-sm font-medium text-blue-200 mb-1">JID</label>
                 <div className="flex items-center">
-                  <Input value={modalInstance.ownerJid ?? ""} readOnly className="pr-8 font-mono text-sm bg-white/10 border-white/20 text-white" />
+                  <Input value={modalInstance.ownerJid ?? ""} readOnly className="pr-8 font-mono text-sm bg-white/10 border-white/20 text-white rounded-2xl" />
                   <Button
                     variant="ghost"
                     size="icon"
@@ -761,7 +761,7 @@ export default function WhatsAppInstances() {
                   <div className="flex gap-2 mb-2 flex-wrap">
                     <Button
                       size="sm"
-                      className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+                      className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
                       onClick={() => handleStartQrPolling(modalInstance.name)}
                       disabled={qrData[modalInstance.name]?.loading || modalInstance.connectionStatus === "connected"}
                     >
@@ -773,7 +773,7 @@ export default function WhatsAppInstances() {
                     </Button>
                     <Button
                       size="sm"
-                      className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+                      className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
                       onClick={() => fetchQrData(modalInstance.name)}
                       disabled={qrData[modalInstance.name]?.loading}
                     >
@@ -809,7 +809,7 @@ export default function WhatsAppInstances() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+                  className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
                   onClick={() => fetchQrData(modalInstance.name)}
                 >
                   <RotateCw className="h-3 w-3 mr-1" />
@@ -819,7 +819,7 @@ export default function WhatsAppInstances() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-white"
+                    className="bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-600 hover:to-amber-500 text-white rounded-2xl"
                     onClick={() => handleDisconnectInstance(modalInstance.id)}
                   >
                     <Power className="h-3 w-3 mr-1" />
@@ -829,7 +829,7 @@ export default function WhatsAppInstances() {
                 <Button
                   variant="outline"
                   size="sm"
-                  className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
+                  className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-2xl"
                   onClick={() => {
                     setInstanceToDelete(modalInstance)
                     setDeleteDialogOpen(true)

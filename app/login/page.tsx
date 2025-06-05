@@ -140,7 +140,7 @@ export default function LoginPage() {
             transition={{ duration: 0.5 }}
             className="w-full max-w-md mx-auto"
           >
-            <Card className="backdrop-blur-sm bg-white/10 border-white/20 shadow-2xl">
+            <Card className="backdrop-blur-sm bg-white/10 border-white/20 shadow-2xl rounded-2xl">
               <CardHeader className="space-y-1 flex flex-col items-center">
                 <div className="md:hidden w-20 h-20 mb-2">
                   <Image
@@ -180,7 +180,7 @@ export default function LoginPage() {
                         placeholder="admin"
                         value={username}
                         onChange={(e) => setUsername(e.target.value)}
-                        className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 focus:border-blue-400 transition-all"
+                        className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 focus:border-blue-400 transition-all rounded-2xl"
                       />
                     </div>
                   </div>
@@ -196,7 +196,7 @@ export default function LoginPage() {
                         placeholder="••••••"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 focus:border-blue-400 transition-all"
+                        className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 focus:border-blue-400 transition-all rounded-2xl"
                       />
                     </div>
                   </div>
@@ -219,7 +219,7 @@ export default function LoginPage() {
                 <CardFooter>
                   <Button
                     type="submit"
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-medium py-2 px-4 rounded-md transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white font-medium py-2 px-4 rounded-2xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg"
                     disabled={isLoading}
                   >
                     {isLoading ? (

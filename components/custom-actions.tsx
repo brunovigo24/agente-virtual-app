@@ -337,7 +337,7 @@ export default function AcoesAutomatizadas() {
         </div>
         <Button
           onClick={handleCreate}
-          className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+          className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
         >
           <Plus className="h-4 w-4" /> Nova Ação
         </Button>
@@ -354,7 +354,7 @@ export default function AcoesAutomatizadas() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: index * 0.05 }}
           >
-            <Card className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10">
+            <Card className="flex flex-col md:flex-row items-start md:items-center justify-between p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 rounded-2xl">
               <div className="flex-1 flex flex-col gap-1">
                 <div className="flex items-center gap-2">
                   <Badge variant="outline" className="bg-blue-500/20 text-blue-200 text-xs">
@@ -413,10 +413,10 @@ export default function AcoesAutomatizadas() {
                 )}
               </div>
               <div className="flex gap-2 mt-2 md:mt-0">
-                <Button size="icon" variant="ghost" title="Editar" onClick={() => handleEdit(acao)}>
+                <Button size="icon" variant="ghost" title="Editar" onClick={() => handleEdit(acao)} className="rounded-full hover:bg-blue-500/20">
                   <Edit className="h-4 w-4 text-blue-300" />
                 </Button>
-                <Button size="icon" variant="ghost" title="Deletar" onClick={() => handleDelete(acao)}>
+                <Button size="icon" variant="ghost" title="Deletar" onClick={() => handleDelete(acao)} className="rounded-full hover:bg-red-500/20">
                   <Trash2 className="h-4 w-4 text-red-400" />
                 </Button>
               </div>
@@ -442,7 +442,7 @@ export default function AcoesAutomatizadas() {
               e.preventDefault();
               handleSave();
             }}
-            className="flex flex-col gap-4 mt-4"
+            className="flex flex-col gap-4 mt-4 "
           >
             {/* Se for criação, mostrar selects de etapa e opção */}
             {isCreating ? (
@@ -503,7 +503,7 @@ export default function AcoesAutomatizadas() {
                       setEditingAcao((prev) => prev && { ...prev, etapa: e.target.value })
                     }
                     required
-                    className="bg-slate-800 border-white/10 text-white"
+                    className="bg-slate-800 border-white/10 text-white rounded-2xl"
                     disabled={!isCreating}
                   />
                 </div>
@@ -518,7 +518,7 @@ export default function AcoesAutomatizadas() {
                       setEditingAcao((prev) => prev && { ...prev, opcao: e.target.value })
                     }
                     required
-                    className="bg-slate-800 border-white/10 text-white"
+                    className="bg-slate-800 border-white/10 text-white rounded-2xl"
                   />
                 </div>
               </>
@@ -534,13 +534,13 @@ export default function AcoesAutomatizadas() {
                   if (value !== "arquivo") setArquivo(null);
                 }}
               >
-                <SelectTrigger className="bg-slate-800 border-white/10 text-white">
+                <SelectTrigger className="bg-slate-800 border-white/10 text-white rounded-2xl">
                   <SelectValue placeholder="Selecione o tipo de ação" />
                 </SelectTrigger>
-                <SelectContent className="bg-slate-800 border-white/10 text-white">
-                  <SelectItem value="mensagem">Mensagem</SelectItem>
-                  <SelectItem value="link">Link</SelectItem>
-                  <SelectItem value="arquivo">Arquivo</SelectItem>
+                <SelectContent className="bg-slate-800 border-white/10 text-white rounded-2xl">
+                  <SelectItem className="rounded-2xl" value="mensagem">Mensagem</SelectItem>
+                  <SelectItem className="rounded-2xl" value="link">Link</SelectItem>
+                  <SelectItem className="rounded-2xl" value="arquivo">Arquivo</SelectItem>
                   {/*<SelectItem value="transferencia">Transferência</SelectItem>*/}
                 </SelectContent>
               </Select>
@@ -556,7 +556,7 @@ export default function AcoesAutomatizadas() {
                   setEditingAcao((prev) => prev && { ...prev, conteudo: e.target.value })
                 }
                 required
-                className="bg-slate-800 border-white/10 text-white"
+                className="bg-slate-800 border-white/10 text-white rounded-2xl"
               />
             </div>
             {/* Campo de upload de arquivo */}
@@ -569,7 +569,7 @@ export default function AcoesAutomatizadas() {
                   accept="image/*,video/*"
                   ref={fileInputRef}
                   onChange={e => setArquivo(e.target.files?.[0] || null)}
-                  className="bg-slate-800 border-white/10 text-white"
+                  className="bg-slate-800 border-white/10 text-white rounded-2xl"
                 />
                 {/* Exibe nome do arquivo selecionado */}
                 {arquivo && <div className="text-blue-200 text-xs mt-1">Selecionado: {arquivo.name}</div>}
@@ -585,14 +585,14 @@ export default function AcoesAutomatizadas() {
                 type="button"
                 onClick={() => setIsDialogOpen(false)}
                 disabled={isSaving}
-                className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+                className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
               >
                 Cancelar
               </Button>
               <Button
                 type="submit"
                 disabled={isSaving}
-                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+                className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
               >
                 {isSaving ? (
                   <>
@@ -640,14 +640,14 @@ export default function AcoesAutomatizadas() {
               variant="outline"
               type="button"
               onClick={() => setIsDeleteDialogOpen(false)}
-              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
             >
               Cancelar
             </Button>
             <Button
               type="button"
               onClick={confirmDelete}
-              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
+              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-2xl"
             >
               Deletar
             </Button>

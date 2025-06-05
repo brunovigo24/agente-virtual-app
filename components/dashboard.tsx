@@ -89,7 +89,7 @@ export default function Dashboard() {
           <Sidebar className="backdrop-blur-sm bg-black/30 border-r border-white/10">
             <SidebarHeader className="flex flex-col gap-2 p-4">
               <div className="flex items-center justify-between">
-                  <div className="h-10 w-10 rounded-md overflow-hidden bg-gradient-to-br from-blue-600 to-blue-400 p-1 shadow-lg">
+                  <div className="h-10 w-10 rounded-2xl overflow-hidden bg-gradient-to-br from-blue-600 to-blue-400 p-1 shadow-lg">
                     <Image
                       src="/images/robo.png"
                       alt="Agente Virtual"
@@ -104,7 +104,7 @@ export default function Dashboard() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10"
+                  className="h-7 w-7 text-white/70 hover:text-white hover:bg-white/10 rounded-full hover:bg-blue-500/20"
                   onClick={() => setSidebarOpen(false)}
                 >
                   <PanelLeft className="h-4 w-4" />
@@ -124,7 +124,7 @@ export default function Dashboard() {
                         asChild
                         isActive={activeContent === "menus"}
                         onClick={() => changeContent("menus")}
-                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400"
+                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400 rounded-2xl"
                       >
                         <button>
                           <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
@@ -156,7 +156,7 @@ export default function Dashboard() {
                         asChild
                         isActive={activeContent === "mensagens"}
                         onClick={() => changeContent("mensagens")}
-                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400"
+                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400 rounded-2xl"
                       >
                         <button>
                           <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
@@ -178,7 +178,7 @@ export default function Dashboard() {
                         asChild
                         isActive={activeContent === "acoes"}
                         onClick={() => changeContent("acoes")}
-                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400"
+                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400 rounded-2xl"
                       >
                         <button>
                           <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
@@ -200,7 +200,7 @@ export default function Dashboard() {
                         asChild
                         isActive={activeContent === "whatsapp"}
                         onClick={() => changeContent("whatsapp")}
-                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400"
+                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400 rounded-2xl"
                       >
                         <button>
                           <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
@@ -222,7 +222,7 @@ export default function Dashboard() {
                         asChild
                         isActive={activeContent === "instances"}
                         onClick={() => changeContent("instances")}
-                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400"
+                        className="text-white/80 hover:text-white hover:bg-white/10 data-[active=true]:bg-gradient-to-r data-[active=true]:from-blue-600/20 data-[active=true]:to-blue-500/10 data-[active=true]:border-l-2 data-[active=true]:border-blue-400 rounded-2xl"
                       >
                         <button>
                           <div className="flex items-center justify-center h-6 w-6 rounded-md overflow-hidden bg-gradient-to-br from-blue-500/20 to-blue-400/20 p-1">
@@ -287,8 +287,8 @@ export default function Dashboard() {
                   </Button>
                 </div>
               )}
-              <main className="flex-1 overflow-auto p-4">
-                <div className="w-full">
+              <main className="flex-1 overflow-auto p-6">
+                <div className="w-full max-w-7xl mx-auto">
                   {renderContent()}
                 </div>
               </main>

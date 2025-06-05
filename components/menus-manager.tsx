@@ -219,14 +219,14 @@ export default function MenusManager() {
           <Button
             onClick={fetchMenus}
             variant="outline"
-            className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+            className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
           >
             <RefreshCw className="h-4 w-4 mr-2" />
             Atualizar
           </Button>
           <Button
             onClick={handleCreate}
-            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+            className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
           >
             <Plus className="h-4 w-4 mr-2" />
             Novo Menu
@@ -240,7 +240,7 @@ export default function MenusManager() {
           placeholder="Pesquisar por nome ou ID..."
           value={searchTerm}
           onChange={e => setSearchTerm(e.target.value)}
-          className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+          className="pl-10 pr-10 bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 rounded-2xl"
         />
         {searchTerm && (
           <button
@@ -254,7 +254,7 @@ export default function MenusManager() {
         )}
       </div>
 
-      <Card className="shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white">
+      <Card className="shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white rounded-2xl">
         <CardHeader>
           <CardTitle className="text-blue-100">Lista de Menus</CardTitle>
         </CardHeader>
@@ -301,7 +301,7 @@ export default function MenusManager() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleEdit(menu)}
-                          className="text-blue-200 hover:text-white hover:bg-white/10"
+                          className="text-blue-200 hover:text-white hover:bg-white/10 rounded-2xl"
                         >
                           <Edit className="h-4 w-4 mr-1" />
                           Editar
@@ -340,7 +340,7 @@ export default function MenusManager() {
                     setEditingMenu({ ...editingMenu, titulo: e.target.value })
                   }
                   placeholder="Ex: Menu Principal"
-                  className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 rounded-2xl" 
                 />
               </div>
               <div className="grid gap-2">
@@ -358,7 +358,7 @@ export default function MenusManager() {
                     })
                   }
                   placeholder="Escolha uma das opções abaixo:&#10;📝 Matrículas&#10;📘 Coordenação"
-                  className="font-mono bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+                  className="font-mono bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 rounded-2xl"
                 />
                 <p className="text-xs text-blue-300">
                   Você pode incluir emojis para ilustrar as opções.
@@ -384,7 +384,7 @@ export default function MenusManager() {
                           setEditingMenu({ ...editingMenu, opcoes: newOpcoes });
                         }}
                         placeholder="ID"
-                        className="text-center bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+                        className="text-center bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 rounded-2xl"
                       />
                     </div>
                     <div className="flex-1">
@@ -406,7 +406,7 @@ export default function MenusManager() {
                           setEditingMenu({ ...editingMenu, opcoes: newOpcoes });
                         }}
                         placeholder="Título da opção"
-                        className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+                        className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 rounded-2xl"
                       />
                     </div>
                     {index !== editingMenu.opcoes.length - 1 && (
@@ -416,7 +416,7 @@ export default function MenusManager() {
                             type="button"
                             variant="ghost"
                             size="icon"
-                            className="text-red-400 hover:text-red-300 hover:bg-white/10"
+                            className="text-red-400 hover:text-red-300 hover:bg-white/10 rounded-2xl"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
@@ -430,7 +430,7 @@ export default function MenusManager() {
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter>
-                            <AlertDialogCancel className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+                            <AlertDialogCancel className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
                             >
                               Cancelar</AlertDialogCancel>
                             <AlertDialogAction
@@ -439,7 +439,7 @@ export default function MenusManager() {
                                 newOpcoes.splice(index, 1);
                                 setEditingMenu({ ...editingMenu, opcoes: newOpcoes });
                               }}
-                              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white"
+                              className="bg-gradient-to-r from-red-600 to-red-500 hover:from-red-700 hover:to-red-600 text-white rounded-2xl"
                               >
                               Excluir
                             </AlertDialogAction>
@@ -453,7 +453,7 @@ export default function MenusManager() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="mt-2 border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+                  className="mt-2 border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
                   onClick={() => {
                     const ids = editingMenu.opcoes
                       .map((o) => Number.parseInt(o.id))
@@ -472,7 +472,7 @@ export default function MenusManager() {
                   Adicionar Opção
                 </Button>
               </div>
-              <div className="bg-blue-900/20 p-3 rounded-md">
+              <div className="bg-blue-900/20 p-3 rounded-2xl">
                 <Label className="mb-2 block text-blue-200">
                   Pré-visualização:
                 </Label>
@@ -494,14 +494,14 @@ export default function MenusManager() {
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
               disabled={isSaving}
-              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
             >
               {isSaving ? (
                 <>

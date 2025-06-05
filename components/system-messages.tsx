@@ -158,7 +158,7 @@ export default function SystemMessages() {
         <Button
           onClick={fetchMensagens}
           variant="outline"
-          className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+          className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
         >
           <RefreshCw className="h-4 w-4 mr-2" />
           Atualizar
@@ -174,7 +174,7 @@ export default function SystemMessages() {
             transition={{ duration: 0.5, delay: index * 0.1 }}
           >
             <Card
-              className="p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white"
+              className="p-4 shadow-xl backdrop-blur-sm bg-white/5 border-white/10 text-white rounded-2xl"
             >
               <div className="flex items-start justify-between mb-2">
                 <div className="flex items-center gap-2">
@@ -192,13 +192,13 @@ export default function SystemMessages() {
                   variant="ghost"
                   size="sm"
                   onClick={() => handleEdit(mensagem)}
-                  className="text-blue-200 hover:text-white hover:bg-white/10"
+                  className="text-blue-200 hover:text-white hover:bg-white/10 rounded-2xl"
                 >
                   <Edit className="h-4 w-4 mr-2" />
                   Editar
                 </Button>
               </div>
-              <div className="whitespace-pre-wrap bg-blue-900/20 p-3 rounded-md text-sm text-blue-100">
+              <div className="whitespace-pre-wrap bg-blue-900/20 p-3 text-sm text-blue-100">
                 {mensagem.conteudo}
               </div>
             </Card>
@@ -233,11 +233,11 @@ export default function SystemMessages() {
                       conteudo: e.target.value,
                     })
                   }
-                  className="font-mono bg-white/10 border-white/20 text-white placeholder:text-blue-200/50"
+                  className="font-mono bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 rounded-2xl"
                 />
               </div>
 
-              <div className="bg-blue-900/20 p-3 rounded-md">
+              <div className="bg-blue-900/20 p-3 rounded-2xl">
                 <Label className="mb-2 block text-blue-200">
                   Pré-visualização:
                 </Label>
@@ -253,14 +253,14 @@ export default function SystemMessages() {
               variant="outline"
               onClick={() => setIsDialogOpen(false)}
               disabled={isSaving}
-              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white"
+              className="border-white/20 bg-white/5 text-blue-100 hover:bg-white/10 hover:text-white rounded-2xl"
             >
               Cancelar
             </Button>
             <Button
               onClick={handleSave}
               disabled={isSaving}
-              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white"
+              className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-700 hover:to-blue-600 text-white rounded-2xl"
             >
               {isSaving ? (
                 <>
