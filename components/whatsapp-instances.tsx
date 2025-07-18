@@ -86,6 +86,13 @@ export default function WhatsAppInstances() {
     filterInstances()
   }, [instances, searchQuery, statusFilter])
 
+  // Pré-preencher número ao abrir modal de criação
+  useEffect(() => {
+    if (createDialogOpen) {
+      setNewInstanceNumber("+55 (")
+    }
+  }, [createDialogOpen])
+
   const getAuthHeaders = () => {
     const token = localStorage.getItem("authToken")
     return {
