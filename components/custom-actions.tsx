@@ -40,6 +40,40 @@ type MenuItem = {
   ativo?: boolean;
 };
 
+// Constantes para validação de arquivos
+const MAX_ARQUIVOS = 5;
+const MAX_TAMANHO_ARQUIVO = 10 * 1024 * 1024; // 10MB em bytes
+const TIPOS_ACEITOS = [
+  'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp',
+  'video/mp4', 'video/avi', 'video/mov', 'video/wmv',
+  'application/pdf',
+  'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/plain', 'text/csv'
+];
+
+// Função para formatar tamanho do arquivo
+function formatarTamanhoArquivo(bytes: number): string {
+  if (bytes === 0) return '0 B';
+  const k = 1024;
+  const sizes = ['B', 'KB', 'MB', 'GB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+}
+
+// Função para validar arquivo
+function validarArquivo(arquivo: File): { valido: boolean; erro?: string } {
+  if (arquivo.size > MAX_TAMANHO_ARQUIVO) {
+    return { valido: false, erro: `Arquivo muito grande (máximo ${formatarTamanhoArquivo(MAX_TAMANHO_ARQUIVO)})` };
+  }
+  
+  if (!TIPOS_ACEITOS.includes(arquivo.type)) {
+    return { valido: false, erro: 'Tipo de arquivo não suportado' };
+  }
+  
+  return { valido: true };
+}
+
 export default function AcoesAutomatizadas() {
   const [acoes, setAcoes] = useState<Acao[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -49,7 +83,8 @@ export default function AcoesAutomatizadas() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState<boolean | null>(null);
   const [isCreating, setIsCreating] = useState(false);
-  const [arquivo, setArquivo] = useState<File | null>(null);
+  const [arquivos, setArquivos] = useState<File[]>([]);
+  const [arquivosInvalidos, setArquivosInvalidos] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [acaoParaDeletar, setAcaoParaDeletar] = useState<Acao | null>(null);
@@ -72,7 +107,7 @@ export default function AcoesAutomatizadas() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetchWithAuth(`${API_BASE_URL}/api/acoes`, {
+      const response = await fetchWithAuth(`${API_BASE_URL}/api/acoes?incluirArquivos=true`, {
         headers: getAuthHeaders() as HeadersInit,
       });
       if (!response) return;
@@ -112,7 +147,8 @@ export default function AcoesAutomatizadas() {
     setIsDialogOpen(true);
     setSaveSuccess(null);
     setIsCreating(false);
-    setArquivo(null);
+    setArquivos([]);
+    setArquivosInvalidos([]);
   };
 
   const handleCreate = () => {
@@ -120,7 +156,8 @@ export default function AcoesAutomatizadas() {
     setIsDialogOpen(true);
     setSaveSuccess(null);
     setIsCreating(true);
-    setArquivo(null);
+    setArquivos([]);
+    setArquivosInvalidos([]);
     fetchMenus(); 
   };
 
@@ -173,7 +210,7 @@ export default function AcoesAutomatizadas() {
       }
 
       // 6. Atualizar a lista de ações
-      const acoesResponse = await fetchWithAuth(`${API_BASE_URL}/api/acoes`, {
+      const acoesResponse = await fetchWithAuth(`${API_BASE_URL}/api/acoes?incluirArquivos=true`, {
         headers: getAuthHeaders() as HeadersInit,
       });
       if (!acoesResponse) return;
@@ -202,7 +239,7 @@ export default function AcoesAutomatizadas() {
     setSaveSuccess(null);
     try {
       let response;
-      if ((isCreating && editingAcao.acao_tipo === "arquivo") || (!isCreating && editingAcao.acao_tipo === "arquivo" && arquivo)) {
+      if ((isCreating && editingAcao.acao_tipo === "arquivo") || (!isCreating && editingAcao.acao_tipo === "arquivo" && arquivos.length > 0)) {
         const formData = new FormData();
         if (isCreating) {
           formData.append("etapa", editingAcao.etapa);
@@ -210,7 +247,10 @@ export default function AcoesAutomatizadas() {
         formData.append("opcao", editingAcao.opcao);
         formData.append("acao_tipo", editingAcao.acao_tipo);
         formData.append("conteudo", editingAcao.conteudo);
-        if (arquivo) formData.append("arquivo", arquivo);
+        // Adicionar múltiplos arquivos
+        arquivos.forEach(arquivo => {
+          formData.append("arquivos", arquivo);
+        });
         response = await fetchWithAuth(isCreating ? `${API_BASE_URL}/api/acoes` : `${API_BASE_URL}/api/acoes/${editingAcao.id}`, {
           method: isCreating ? "POST" : "PUT",
           headers: {
@@ -282,7 +322,7 @@ export default function AcoesAutomatizadas() {
       setSaveSuccess(true);
       setIsDialogOpen(false);
       setEditingAcao(null);
-      setArquivo(null);
+      setArquivos([]);
       fetchAcoes();
       toast({
         title: isCreating ? "Ação criada" : "Ação atualizada",
@@ -368,8 +408,53 @@ export default function AcoesAutomatizadas() {
                   </Badge>
                 </div>
                 <div className="text-white font-medium mt-1">{acao.conteudo}</div>
-                {/* Exibe arquivo se for do tipo arquivo */}
-                {acao.acao_tipo === "arquivo" && (acao as any).arquivo && (acao as any).arquivo_tipo && (
+                {/* Exibe arquivos se for do tipo arquivo */}
+                {acao.acao_tipo === "arquivo" && (acao as any).arquivos && Array.isArray((acao as any).arquivos) && (
+                  <div className="mt-2 grid grid-cols-2 md:grid-cols-3 gap-2">
+                    {(acao as any).arquivos.map((arquivo: any, index: number) => {
+                      const url = bufferToUrl(arquivo.arquivo, arquivo.arquivo_tipo) || '';
+                      if (!url) return null;
+                      
+                      return (
+                        <div key={index} className="flex flex-col">
+                          {arquivo.arquivo_tipo.startsWith("image/") ? (
+                            <img
+                              src={url}
+                              alt={arquivo.arquivo_nome || `Arquivo ${index + 1}`}
+                              className="w-full h-24 object-cover rounded border border-white/10"
+                            />
+                          ) : arquivo.arquivo_tipo.startsWith("video/") ? (
+                            <video
+                              src={url}
+                              controls
+                              className="w-full h-24 rounded border border-white/10"
+                            />
+                          ) : (
+                            <div className="w-full h-24 flex items-center justify-center bg-slate-700 rounded border border-white/10">
+                              <span className="text-xs text-blue-300">Arquivo</span>
+                            </div>
+                          )}
+                          <span className="text-xs text-blue-200 mt-1 truncate">
+                            {arquivo.arquivo_nome || `Arquivo ${index + 1}`}
+                          </span>
+                          {!arquivo.arquivo_tipo.startsWith("image/") && !arquivo.arquivo_tipo.startsWith("video/") && (
+                            <a
+                              href={url}
+                              download={arquivo.arquivo_nome || undefined}
+                              className="text-xs text-blue-300 underline mt-1"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              Baixar
+                            </a>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {/* Fallback para compatibilidade com formato antigo */}
+                {acao.acao_tipo === "arquivo" && (acao as any).arquivo && (acao as any).arquivo_tipo && !(acao as any).arquivos && (
                   <div className="mt-2">
                     {(acao as any).arquivo_tipo.startsWith("image/") ? (
                       (() => {
@@ -531,7 +616,7 @@ export default function AcoesAutomatizadas() {
                 value={editingAcao?.acao_tipo || ""}
                 onValueChange={(value) => {
                   setEditingAcao((prev) => prev && { ...prev, acao_tipo: value });
-                  if (value !== "arquivo") setArquivo(null);
+                  if (value !== "arquivo") setArquivos([]);
                 }}
               >
                 <SelectTrigger className="bg-slate-800 border-white/10 text-white rounded-2xl">
@@ -557,25 +642,136 @@ export default function AcoesAutomatizadas() {
                 }
                 required
                 className="bg-slate-800 border-white/10 text-white rounded-2xl"
+                placeholder={editingAcao?.acao_tipo === "arquivo" ? "Ex: Aqui estão as fotos do cardápio! 📸" : "Digite o conteúdo da ação..."}
               />
             </div>
-            {/* Campo de upload de arquivo */}
+            {/* Campo de upload de múltiplos arquivos */}
             {editingAcao?.acao_tipo === "arquivo" && (
               <div>
-                <Label htmlFor="arquivo" className="text-blue-100">Arquivo</Label>
+                <Label htmlFor="arquivos" className="text-blue-100">
+                  Arquivos (Máximo {MAX_ARQUIVOS} arquivos, {formatarTamanhoArquivo(MAX_TAMANHO_ARQUIVO)} cada)
+                </Label>
+                <div className="text-xs text-blue-300 mb-2">
+                  Tipos suportados: Imagens (JPG, PNG, GIF), Vídeos (MP4, AVI), Documentos (PDF, DOC, XLS), Texto (TXT, CSV)
+                </div>
                 <Input
-                  id="arquivo"
+                  id="arquivos"
                   type="file"
-                  accept="image/*,video/*"
+                  accept=".jpg,.jpeg,.png,.gif,.webp,.mp4,.avi,.mov,.wmv,.pdf,.doc,.docx,.xls,.xlsx,.txt,.csv"
+                  multiple
                   ref={fileInputRef}
-                  onChange={e => setArquivo(e.target.files?.[0] || null)}
+                  onChange={e => {
+                    const files = Array.from(e.target.files || []);
+                    const errosValidacao: string[] = [];
+                    const arquivosValidos: File[] = [];
+                    
+                    // Verificar limite máximo de arquivos
+                    if (files.length > MAX_ARQUIVOS) {
+                      errosValidacao.push(`Máximo ${MAX_ARQUIVOS} arquivos permitidos`);
+                      return;
+                    }
+                    
+                    // Validar cada arquivo
+                    files.forEach((arquivo, index) => {
+                      const validacao = validarArquivo(arquivo);
+                      if (validacao.valido) {
+                        arquivosValidos.push(arquivo);
+                      } else {
+                        errosValidacao.push(`${arquivo.name}: ${validacao.erro}`);
+                      }
+                    });
+                    
+                    setArquivos(arquivosValidos);
+                    setArquivosInvalidos(errosValidacao);
+                    
+                                         if (errosValidacao.length > 0) {
+                       toast({
+                         title: "Alguns arquivos não foram aceitos",
+                         description: errosValidacao.join(', '),
+                         open: true,
+                       });
+                     }
+                  }}
                   className="bg-slate-800 border-white/10 text-white rounded-2xl"
                 />
-                {/* Exibe nome do arquivo selecionado */}
-                {arquivo && <div className="text-blue-200 text-xs mt-1">Selecionado: {arquivo.name}</div>}
-                {/* Exibe arquivo já salvo ao editar */}
-                {!arquivo && !isCreating && editingAcao && (editingAcao as any).arquivo_nome && (
-                  <div className="text-blue-200 text-xs mt-1">Atual: {(editingAcao as any).arquivo_nome}</div>
+                
+                {/* Exibe erros de validação */}
+                {arquivosInvalidos.length > 0 && (
+                  <div className="mt-2 p-2 bg-red-500/20 border border-red-500/50 rounded text-xs">
+                    <div className="text-red-300 font-semibold mb-1">Arquivos rejeitados:</div>
+                    {arquivosInvalidos.map((erro, index) => (
+                      <div key={index} className="text-red-200">• {erro}</div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Exibe arquivos selecionados */}
+                {arquivos.length > 0 && (
+                  <div className="mt-2">
+                    <div className="text-blue-200 text-xs mb-2 flex items-center justify-between">
+                      <span>Arquivos selecionados ({arquivos.length}/{MAX_ARQUIVOS}):</span>
+                      <span className="text-green-300">
+                        Total: {formatarTamanhoArquivo(arquivos.reduce((sum, file) => sum + file.size, 0))}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-2 max-h-32 overflow-y-auto">
+                      {arquivos.map((arquivo, index) => (
+                        <div key={index} className="flex items-center justify-between bg-slate-700 px-3 py-2 rounded text-xs">
+                          <div className="flex-1 min-w-0">
+                            <div className="text-blue-200 truncate font-medium">{arquivo.name}</div>
+                            <div className="text-blue-300 flex items-center gap-2">
+                              <span>{formatarTamanhoArquivo(arquivo.size)}</span>
+                              <span>•</span>
+                              <span>{arquivo.type.split('/')[1]?.toUpperCase() || 'Arquivo'}</span>
+                              {index === 0 && <span className="text-green-300">(primeira)</span>}
+                            </div>
+                          </div>
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="ghost"
+                            onClick={() => {
+                              const novosArquivos = arquivos.filter((_, i) => i !== index);
+                              setArquivos(novosArquivos);
+                              // Limpar erros se não há mais arquivos
+                              if (novosArquivos.length === 0) {
+                                setArquivosInvalidos([]);
+                              }
+                            }}
+                            className="h-6 w-6 p-0 text-red-400 hover:text-red-300 hover:bg-red-500/20 ml-2"
+                          >
+                            ×
+                          </Button>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="text-xs text-blue-300 mt-2">
+                      💡 No WhatsApp: Arquivos serão enviados sequencialmente com numeração automática (1/{arquivos.length}, 2/{arquivos.length}, etc.)
+                    </div>
+                  </div>
+                )}
+                
+                {/* Exibe arquivos já salvos ao editar */}
+                {arquivos.length === 0 && !isCreating && editingAcao && (editingAcao as any).arquivos && Array.isArray((editingAcao as any).arquivos) && (
+                  <div className="mt-2">
+                    <div className="text-blue-200 text-xs mb-2">Arquivos atuais ({(editingAcao as any).arquivos.length}):</div>
+                    <div className="grid grid-cols-1 gap-1">
+                      {(editingAcao as any).arquivos.map((arquivo: any, index: number) => (
+                        <div key={index} className="text-blue-200 text-xs bg-slate-700 px-2 py-1 rounded flex justify-between">
+                          <span>{arquivo.arquivo_nome || `Arquivo ${index + 1}`}</span>
+                          <span className="text-blue-300">{arquivo.arquivo_tipo?.split('/')[1]?.toUpperCase()}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {/* Fallback para compatibilidade com formato antigo */}
+                {arquivos.length === 0 && !isCreating && editingAcao && (editingAcao as any).arquivo_nome && !(editingAcao as any).arquivos && (
+                  <div className="text-blue-200 text-xs mt-1">
+                    Atual: {(editingAcao as any).arquivo_nome}
+                    <span className="text-blue-300 ml-2">(formato antigo - um arquivo)</span>
+                  </div>
                 )}
               </div>
             )}
