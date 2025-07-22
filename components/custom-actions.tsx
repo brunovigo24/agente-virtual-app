@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Edit, Save, Loader2, CheckCircle, AlertCircle, Plus, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/components/ui/use-toast";
@@ -30,6 +31,7 @@ export type Acao = {
   opcao: string;
   acao_tipo: string;
   conteudo: string;
+  aguarda_resposta?: boolean;
 };
 
 type MenuItem = {
@@ -152,7 +154,7 @@ export default function AcoesAutomatizadas() {
   };
 
   const handleCreate = () => {
-    setEditingAcao({ id: "", etapa: "", opcao: "", acao_tipo: "mensagem", conteudo: "" });
+    setEditingAcao({ id: "", etapa: "", opcao: "", acao_tipo: "mensagem", conteudo: "", aguarda_resposta: false });
     setIsDialogOpen(true);
     setSaveSuccess(null);
     setIsCreating(true);
@@ -247,6 +249,7 @@ export default function AcoesAutomatizadas() {
         formData.append("opcao", editingAcao.opcao);
         formData.append("acao_tipo", editingAcao.acao_tipo);
         formData.append("conteudo", editingAcao.conteudo);
+        formData.append("aguarda_resposta", editingAcao.aguarda_resposta ? "true" : "false");
         // Adicionar múltiplos arquivos
         arquivos.forEach(arquivo => {
           formData.append("arquivos", arquivo);
@@ -270,10 +273,12 @@ export default function AcoesAutomatizadas() {
             opcao: editingAcao.opcao,
             acao_tipo: editingAcao.acao_tipo,
             conteudo: editingAcao.conteudo,
+            aguarda_resposta: editingAcao.aguarda_resposta,
           } : {
             opcao: editingAcao.opcao,
             acao_tipo: editingAcao.acao_tipo,
             conteudo: editingAcao.conteudo,
+            aguarda_resposta: editingAcao.aguarda_resposta,
           }),
         });
       }
@@ -406,6 +411,11 @@ export default function AcoesAutomatizadas() {
                   <Badge variant="outline" className="bg-purple-500/20 text-purple-200 text-xs">
                     {acao.acao_tipo}
                   </Badge>
+                  {acao.aguarda_resposta && (
+                    <Badge variant="outline" className="bg-yellow-500/20 text-yellow-200 text-xs">
+                      Aguarda resposta
+                    </Badge>
+                  )}
                 </div>
                 <div className="text-white font-medium mt-1">{acao.conteudo}</div>
                 {/* Exibe arquivos se for do tipo arquivo */}
@@ -644,6 +654,19 @@ export default function AcoesAutomatizadas() {
                 className="bg-slate-800 border-white/10 text-white rounded-2xl"
                 placeholder={editingAcao?.acao_tipo === "arquivo" ? "Ex: Aqui estão as fotos do cardápio! 📸" : "Digite o conteúdo da ação..."}
               />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="aguarda_resposta"
+                checked={editingAcao?.aguarda_resposta || false}
+                onCheckedChange={(checked) =>
+                  setEditingAcao((prev) => prev && { ...prev, aguarda_resposta: !!checked })
+                }
+                className="border-white/20 data-[state=checked]:bg-blue-600 data-[state=checked]:border-blue-600"
+              />
+              <Label htmlFor="aguarda_resposta" className="text-blue-100 cursor-pointer">
+                Aguardar resposta do usuário
+              </Label>
             </div>
             {/* Campo de upload de múltiplos arquivos */}
             {editingAcao?.acao_tipo === "arquivo" && (
