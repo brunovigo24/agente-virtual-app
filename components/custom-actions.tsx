@@ -249,7 +249,9 @@ export default function AcoesAutomatizadas() {
         formData.append("opcao", editingAcao.opcao);
         formData.append("acao_tipo", editingAcao.acao_tipo);
         formData.append("conteudo", editingAcao.conteudo);
-        formData.append("aguarda_resposta", editingAcao.aguarda_resposta ? "true" : "false");
+        if (Boolean(editingAcao.aguarda_resposta)) {
+          formData.append("aguarda_resposta", "true");
+        }
         // Adicionar múltiplos arquivos
         arquivos.forEach(arquivo => {
           formData.append("arquivos", arquivo);
@@ -273,12 +275,12 @@ export default function AcoesAutomatizadas() {
             opcao: editingAcao.opcao,
             acao_tipo: editingAcao.acao_tipo,
             conteudo: editingAcao.conteudo,
-            aguarda_resposta: editingAcao.aguarda_resposta,
+            ...(Boolean(editingAcao.aguarda_resposta) && { aguarda_resposta: true }),
           } : {
             opcao: editingAcao.opcao,
             acao_tipo: editingAcao.acao_tipo,
             conteudo: editingAcao.conteudo,
-            aguarda_resposta: editingAcao.aguarda_resposta,
+            ...(Boolean(editingAcao.aguarda_resposta) && { aguarda_resposta: true }),
           }),
         });
       }
@@ -411,7 +413,7 @@ export default function AcoesAutomatizadas() {
                   <Badge variant="outline" className="bg-purple-500/20 text-purple-200 text-xs">
                     {acao.acao_tipo}
                   </Badge>
-                  {acao.aguarda_resposta && (
+                  {Boolean(acao.aguarda_resposta) && (
                     <Badge variant="outline" className="bg-yellow-500/20 text-yellow-200 text-xs">
                       Aguarda resposta
                     </Badge>
@@ -658,7 +660,7 @@ export default function AcoesAutomatizadas() {
             <div className="flex items-center space-x-2">
               <Checkbox
                 id="aguarda_resposta"
-                checked={editingAcao?.aguarda_resposta || false}
+                checked={Boolean(editingAcao?.aguarda_resposta)}
                 onCheckedChange={(checked) =>
                   setEditingAcao((prev) => prev && { ...prev, aguarda_resposta: !!checked })
                 }
