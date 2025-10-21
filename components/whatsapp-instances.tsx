@@ -158,7 +158,7 @@ export default function WhatsAppInstances() {
     let digits = value.replace(/\D/g, "");
     digits = digits.slice(0, 13);
 
-    // Monta o formato +55 (44) 99999-9999
+    // Monta o formato +55 (44) 99999-9999 ou +55 (44) 9999-9999
     let formatted = "";
     if (digits.length > 0) {
       formatted += "+" + digits.slice(0, 2);
@@ -167,10 +167,14 @@ export default function WhatsAppInstances() {
       formatted += " (" + digits.slice(2, 4) + ")";
     }
     if (digits.length > 4) {
-      formatted += " " + digits.slice(4, 9);
-    }
-    if (digits.length > 9) {
-      formatted += "-" + digits.slice(9, 13);
+      // Se tiver 9 dígitos após o DDD (total 13), formato: 99999-9999
+      // Se tiver 8 dígitos após o DDD (total 12), formato: 9999-9999
+      const hasNineDigits = digits.length === 13;
+      const splitPoint = hasNineDigits ? 9 : 8;
+      formatted += " " + digits.slice(4, splitPoint);
+      if (digits.length > splitPoint) {
+        formatted += "-" + digits.slice(splitPoint, 13);
+      }
     }
     return formatted;
   };
@@ -183,8 +187,8 @@ export default function WhatsAppInstances() {
   // Função para validar se o número tem código de país e DDD
   const isValidPhoneNumber = (value: string) => {
     const digits = getOnlyDigits(value);
-    // Deve ter 13 dígitos: 2 (país) + 2 (DDD) + 9 (número)
-    return digits.length === 13;
+    // Deve ter 12 ou 13 dígitos: 2 (país) + 2 (DDD) + 8 ou 9 (número)
+    return digits.length === 12 || digits.length === 13;
   };
 
   const handleCreateInstance = async () => {
@@ -648,7 +652,7 @@ export default function WhatsAppInstances() {
               inputMode="numeric"
               className="bg-white/10 border-white/20 text-white placeholder:text-blue-200/50 rounded-2xl"
             />                <p className="text-xs text-white-300">
-            Formato permitido: +55 (44) 00000-0000
+            Formato permitido: +55 (44) 0000-0000 ou +55 (44) 00000-0000 (10 ou 11 dígitos)
           </p>             
           </div>
 
